@@ -121,8 +121,8 @@ class HMCSampler:
             z,s,a = zsa
             accept,newPos,newV = hmcMove(z,energyFn,stepSize,steps)
             z_,s_,a_ = hmcUpdate(z,s,a,newPos,accept,targetAcceptRate,stepSizeInc,stepSizeDec,stepSizeMin,stepSizeMax,acceptDecay)
-            print(z_)
-            z_,s_,a_ = z+1,s+1,a+1
+            #print(z_)
+            #z_,s_,a_ = z+1,s+1,a+1
             return z_,s_,a_
         self.steps = tf.placeholder(tf.int32,[])
         elems = tf.zeros([self.steps])

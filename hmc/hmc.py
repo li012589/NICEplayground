@@ -1,5 +1,5 @@
 import tensorflow as tf
-from utils/expLogger import expLogger
+from utils.expLogger import expLogger
 import numpy as np
 
 def kineticEnergy(v):
@@ -20,7 +20,7 @@ def hamiltonian(p,v,f):
     '''
     return f(p)+kineticEnergy(v)
 
-def metropolisHastingsAccept(energyPre,eneryNext,expLogger,ifuseLogger = False):# TODO: maybe move this to the utils folder
+def metropolisHastingsAccept(energyPre,eneryNext,expLog,ifuseLogger = False):# TODO: maybe move this to the utils folder
     """
     Run Metropolis-Hastings algorithm for 1 step
     :param energyPrev: the original energy from before
@@ -29,7 +29,7 @@ def metropolisHastingsAccept(energyPre,eneryNext,expLogger,ifuseLogger = False):
     """
     energyDiff = energyPre - eneryNext
     if ifuseLogger:
-        return expLogger.cal(energyDiff) # TODO: The energyDiff is a tf tensor object, need some workaround
+        return expLog.cal(energyDiff) # TODO: The energyDiff is a tf tensor object, need some workaround
     return (tf.exp(energyDiff)) - tf.random_uniform(tf.shape(energyPre)) >= 0.0
 
 def leapfrogMeta(pos,vel,step,energyFn,i):
@@ -45,8 +45,8 @@ def leapfrogMeta(pos,vel,step,energyFn,i):
     :return i: the flag variable contain integration times
     '''
     force = tf.gradients(tf.reduce_sum(energyFn(pos)),pos)[0]
-    newV = initialV - step*force
-    newPos = initialPos +step*newV
+    newV = vel - step*force
+    newPos = pos +step*newV
     tf.add(i,1)
     return [newPos,newV,i]
 
@@ -106,7 +106,7 @@ def hmcUpdate(initialPos,stepSize,acceptRate,newPos,accept,targetAcceptRate,step
     """
     Pos = tf.where(accept,newPos,initialPos)
     newStepsize = tf.mltiply(stepSize,tf.tf.where(tf.greater(acceptRate,targetAcceptRate),stepSizeInc,stepSizeDec)) #Update stepSize according to acceptRate
-    newStepsize = tf.maximium(tf.minium(newAcceptRate,stepSizeMax),stepSizeMin)
+    newStepsize = tf.maximium(tf.minium(newStepsize,stepSizeMax),stepSizeMin)
     newAcceptRate = tf.add(acceptDecay*acceptRate,(1.0-acceptRate)*tf.reduce_mean(tf.to_float(accept)))
     return Pos,newStepsize,newAcceptRate
 
@@ -131,7 +131,7 @@ class HMCSampler:
         self.z_,self.stepSize_,self.acceptRate_ = tf.scan(fn,elems,(self.z,self.stepSize,self.acceptRate),back_prop=False)
         self.sess.run(tf.global_variables_initializer())
     def sample(self,steps,batchSize):
-        z,stepSize,acceptRate = self.sess.run([sef.z_,self.stepSize_,self,self.acceptRate_],feed_dict={self.steps:steps,self.z:self.prior(batchSize)})
+        z,stepSize,acceptRate = self.sess.run([self.z_,self.stepSize_,self,self.acceptRate_],feed_dict={self.steps:steps,self.z:self.prior(batchSize)})
         z = np.transpose(z,[1,0,2])
         return z
 

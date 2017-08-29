@@ -118,7 +118,22 @@ class HMCSampler:
         self.energyFn  =energyFn
         self.prior = prior
         self.z = self.energyFn.z
+        self.stepSize = tf.Variable(stepSize)
+        self.acceptRate = tf.Variable(targetAcceptRate)
         self.sess = tf.InteractiveSession()
+        def fn(zsa,x):
+            z,s,a = zsa
+            accept,newPos,newV = hmcMove(z,energyFn,stepSize,steps)
+            z_,s_,a_ = hmcUpdate(z,s,a,newPos,accept,targetAcceptRate,stepSizeInc,stepSizeDec,stepSizeMin,stepSizeMax,acceptDecay)
+            return z_,s_,a_
+        self.steps = tf.placeholder(tf.int32,[])
+        elems = tf.zeros([self.steps])
+        self.z_,self.stepSize_,self.acceptRate_ = tf.scan(fn,elems,(self.z,self.stepSize,self.acceptRate),back_prop=False)
+        self.sess.run(tf.global_variables_initializer())
+    def sample(self,steps,batchSize):
+        z,stepSize,acceptRate = self.sess.run([sef.z_,self.stepSize_,self,self.acceptRate_],feed_dict={self.steps:steps,self.z:self.prior(batchSize)})
+        z = np.transpose(z,[1,0,2])
+        return z
 
 def main():
     pass

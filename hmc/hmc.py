@@ -1,5 +1,10 @@
+if __name__ =="__main__":
+    import os
+    import sys
+    sys.path.append(os.getcwd())
+
 import tensorflow as tf
-from utils.expLogger import expLogger
+from  utils.expLogger import expLogger
 import numpy as np
 
 def kineticEnergy(v):
@@ -32,24 +37,6 @@ def metropolisHastingsAccept(energyPre,eneryNext,expLog,ifuseLogger = False):# T
         return expLog.cal(energyDiff) # TODO: The energyDiff is a tf tensor object, need some workaround
     return (tf.exp(energyDiff)) - tf.random_uniform(tf.shape(energyPre)) >= 0.0
 
-def leapfrogMeta(pos,vel,step,energyFn,i):
-    '''
-    The leapfrog integrator
-    :param pos: the states of the field
-    :param vel: the velocity of the field
-    :param step: step size of a step
-    :param energyFn: the function describe Hamiliton
-    :param i: the flag variable contain integration times
-    :return newPos: the pos after integration
-    :return newV: the velocity after integration
-    :return i: the flag variable contain integration times
-    '''
-    force = tf.gradients(tf.reduce_sum(energyFn(pos)),pos)[0]
-    newV = vel - step*force
-    newPos = pos +step*newV
-    tf.add(i,1)
-    return [newPos,newV,i]
-
 def simulateDynameics(initialPos,initialV,stepSize,steps,energyFn):
     """
     Run Hamilitonian evolution for some step
@@ -65,7 +52,15 @@ def simulateDynameics(initialPos,initialV,stepSize,steps,energyFn):
     tmpV = initialV - 0.5*stepSize*force
     tmpPos = initialPos +stepSize*tmpV
     i = tf.constant(0)
-    newPos,newV,_ = tf.while_loop(tf.less(i,steps),leapfrogMeta,[tmpPos,tmpV,stepSize,i])
+    def condition(pos, vel, step, i):
+        return tf.less(i, steps)
+    def leapfrogMeta(pos,vel,step,i):
+        force = tf.gradients(tf.reduce_sum(energyFn(pos)),pos)[0]
+        newV = vel - step*force
+        newPos = pos +step*newV
+        tf.add(i,1)
+        return [newPos,newV,step,i]
+    newPos,newV,_,_ = tf.while_loop(condition,leapfrogMeta,[tmpPos,tmpV,stepSize,i])
     force = tf.gradients(tf.reduce_sum(energyFn(newPos)),newPos)[0]
     newV -= 0.5*stepSize*force
     newPos += stepSize*newV
@@ -84,7 +79,8 @@ def hmcMove(initialPos,energyFn,stepSize,steps):
     """
     initialV = tf.random_normal(tf.shape(initialPos))
     newPos,newV = simulateDynameics(initialPos,initialV,stepSize,steps,energyFn)
-    accept = metropolisHastingsAccept(hamiltonian(initialPos,initialV,energyFn),hamiltonian(newPos,newV,energyFn))
+    expLog = expLogger({})
+    accept = metropolisHastingsAccept(hamiltonian(initialPos,initialV,energyFn),hamiltonian(newPos,newV,energyFn),expLog)
     return accept,newPos,newV
 
 def hmcUpdate(initialPos,stepSize,acceptRate,newPos,accept,targetAcceptRate,stepSizeInc,stepSizeDec,stepSizeMin,stepSizeMax,acceptDecay):
@@ -105,8 +101,8 @@ def hmcUpdate(initialPos,stepSize,acceptRate,newPos,accept,targetAcceptRate,step
     :return newV: the velocity after evolution
     """
     Pos = tf.where(accept,newPos,initialPos)
-    newStepsize = tf.mltiply(stepSize,tf.tf.where(tf.greater(acceptRate,targetAcceptRate),stepSizeInc,stepSizeDec)) #Update stepSize according to acceptRate
-    newStepsize = tf.maximium(tf.minium(newStepsize,stepSizeMax),stepSizeMin)
+    newStepsize = tf.multiply(stepSize,tf.where(tf.greater(acceptRate,targetAcceptRate),stepSizeInc,stepSizeDec)) #Update stepSize according to acceptRate
+    newStepsize = tf.maximum(tf.minimum(newStepsize,stepSizeMax),stepSizeMin)
     newAcceptRate = tf.add(acceptDecay*acceptRate,(1.0-acceptRate)*tf.reduce_mean(tf.to_float(accept)))
     return Pos,newStepsize,newAcceptRate
 
@@ -115,7 +111,7 @@ class HMCSampler:
     TensorFlow implementation for Hamiltonian Monte Carlo
     """
     def __init__(self,energyFn,prior,stepSize=0.1,steps=10,targetAcceptRate=0.65,acceptDecay=0.9,stepSizeMin=0.001,stepSizeMax=1000,stepSizeDec=0.97,stepSizeInc=1.03):
-        self.energyFn  =energyFn
+        self.energyFn = energyFn
         self.prior = prior
         self.z = self.energyFn.z
         self.stepSize = tf.Variable(stepSize)
@@ -125,18 +121,29 @@ class HMCSampler:
             z,s,a = zsa
             accept,newPos,newV = hmcMove(z,energyFn,stepSize,steps)
             z_,s_,a_ = hmcUpdate(z,s,a,newPos,accept,targetAcceptRate,stepSizeInc,stepSizeDec,stepSizeMin,stepSizeMax,acceptDecay)
+            print(z_)
+            z_,s_,a_ = z+1,s+1,a+1
             return z_,s_,a_
         self.steps = tf.placeholder(tf.int32,[])
         elems = tf.zeros([self.steps])
         self.z_,self.stepSize_,self.acceptRate_ = tf.scan(fn,elems,(self.z,self.stepSize,self.acceptRate),back_prop=False)
         self.sess.run(tf.global_variables_initializer())
     def sample(self,steps,batchSize):
-        z,stepSize,acceptRate = self.sess.run([self.z_,self.stepSize_,self,self.acceptRate_],feed_dict={self.steps:steps,self.z:self.prior(batchSize)})
+        z,stepSize,acceptRate = self.sess.run([self.z_,self.stepSize_,self.acceptRate_],feed_dict={self.steps:steps,self.z:self.prior(batchSize)})
         z = np.transpose(z,[1,0,2])
         return z
 
 def main():
-    pass
+    '''
+    Test script for hmc
+    '''
+    from model.doubleGaussian import doubleGaussian as energyFn
+    def prior(batchSize):
+        return np.random.normal(0,1,[batchSize,2])
+    t = energyFn("test")
+    hmc = HMCSampler(t,prior)
+    print(hmc.sample(10,1))
+    #print(hmc.sess.run(hmc.elems,feed_dict={hmc.steps:10}))
 
 if __name__ == "__main__":
     main()

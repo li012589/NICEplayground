@@ -45,11 +45,19 @@ def simulateDynameics(initialPos,initialV,stepSize,steps,energyFn):
     """
     pass
 
-def leapfrog(pos,vel,step,i):
+def leapfrog(pos,vel,step,energyFn,i):
     '''
     The leapfrog integrator
-    :param 
+    :param pos: the states of the field
+    :param vel: the velocity of the field
+    :param step: step size of a step
+    :param energyFn: the function describe Hamiliton
+    :param i: the flag variable contain integration times
+    :return newPos: the pos after integration
+    :return newV: the velocity after integration
+    :return i: the flag variable contain integration times
     '''
+    force = tf.gradients(tf.reduce_sum(energyFn),pos)[0]
 
 def main():
     pass

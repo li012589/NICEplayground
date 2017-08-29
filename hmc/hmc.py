@@ -58,7 +58,7 @@ def simulateDynameics(initialPos,initialV,stepSize,steps,energyFn):
         force = tf.gradients(tf.reduce_sum(energyFn(pos)),pos)[0]
         newV = vel - step*force
         newPos = pos +step*newV
-        tf.add(i,1)
+        i = tf.add(i,1)
         return [newPos,newV,step,i]
     newPos,newV,_,_ = tf.while_loop(condition,leapfrogMeta,[tmpPos,tmpV,stepSize,i])
     force = tf.gradients(tf.reduce_sum(energyFn(newPos)),newPos)[0]

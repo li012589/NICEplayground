@@ -3,7 +3,8 @@ import tensorflow as tf
 
 class Ring2d:
     def __init__(self,name="Ring2d"):
-         self.z = tf.placeholder(tf.float32, [None, 2], name='z')
+        self.name = name
+        self.z = tf.placeholder(tf.float32, [None, 2], name='z')
 
     def __call__(self, z):
         with tf.variable_scope(self.name):

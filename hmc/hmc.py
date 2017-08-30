@@ -142,7 +142,9 @@ def main():
         return np.random.normal(0,1,[batchSize,2])
     t = energyFn("test")
     hmc = HMCSampler(t,prior)
-    print(hmc.sample(10,1))
+    z=hmc.sample(100,1)
+    print(z)
+    print(t.mean(z))
     #print(hmc.sess.run(hmc.elems,feed_dict={hmc.steps:10}))
 
 if __name__ == "__main__":

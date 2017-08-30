@@ -4,7 +4,8 @@ if __name__ =="__main__":
     sys.path.append(os.getcwd())
 
 import tensorflow as tf
-from  utils.expLogger import expLogger
+from utils.expLogger import expLogger
+from utils.MetropolisHastingsAccept import metropolisHastingsAccept
 import numpy as np
 
 def kineticEnergy(v):
@@ -24,18 +25,6 @@ def hamiltonian(p,v,f):
     :return: hamiltonian
     '''
     return f(p)+kineticEnergy(v)
-
-def metropolisHastingsAccept(energyPre,eneryNext,expLog,ifuseLogger = False):# TODO: maybe move this to the utils folder
-    """
-    Run Metropolis-Hastings algorithm for 1 step
-    :param energyPrev: the original energy from before
-    :param energyNext: the energy after evolution
-    :return: Tensor of boolean values, indicating accept or reject
-    """
-    energyDiff = energyPre - eneryNext
-    if ifuseLogger:
-        return expLog.cal(energyDiff) # TODO: The energyDiff is a tf tensor object, need some workaround
-    return (tf.exp(energyDiff)) - tf.random_uniform(tf.shape(energyPre)) >= 0.0
 
 def simulateDynameics(initialPos,initialV,stepSize,steps,energyFn):
     """
@@ -142,9 +131,9 @@ def main():
         return np.random.normal(0,1,[batchSize,2])
     t = energyFn("test")
     hmc = HMCSampler(t,prior)
-    z=hmc.sample(100,1)
-    print(z)
-    print(t.mean(z))
+    z=hmc.sample(8000,1)
+    #print(z)
+    print(t.measure(z,2))
     #print(hmc.sess.run(hmc.elems,feed_dict={hmc.steps:10}))
 
 if __name__ == "__main__":

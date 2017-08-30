@@ -5,7 +5,7 @@ class phi4:
     '''
     A class represent the phi4 model
     '''
-    def __init__(self,name="phi4",n,l,d):
+    def __init__(self,n,l,d,name="phi4"):
         self.name = name
         self.hoppingTable = dict()
         self.z = tf.placeholder(tf.float32,[None,n])

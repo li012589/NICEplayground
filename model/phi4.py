@@ -12,45 +12,43 @@ class phi4:
         self.l = l
         self.kappa = kappa
         self.lamb = lamb
-        self.hoppingTable = dict()
+        self.hoppingTable = []
         self.z = tf.placeholder(tf.float32,[None,n])
         for i in range(n):
             LK = n
             y = i
-            self.hoppingTable[i] = {}
+            self.hoppingTable.append([])
             for j in reversed(range(d)):
                 LK = int(LK/l)
                 xk = int(y/LK)
                 y = y-xk*LK
                 if xk < l-1:
-                    self.hoppingTable[i][j] = i + LK
+                    self.hoppingTable[i].append(i + LK)
                 else:
-                    self.hoppingTable[i][j] = i + LK*(1-l)
+                    self.hoppingTable[i].append(i + LK*(1-l))
                 if xk > 0:
-                    self.hoppingTable[i][j+d] = i - LK
+                    self.hoppingTable[i].append(i - LK)
                 else:
-                    self.hoppingTable[i][j+d] = i-LK*(1-l)
+                    self.hoppingTable[i].append(i-LK*(1-l))
+        self.hoppingTable = tf.convert_to_tensor(self.hoppingTable,dtype=tf.int32)
     def __call__(self,z):
         with tf.variable_scope(self.name):
-            pass
-            #phi2 = tf.constant(0.0)
             i = tf.constant(0)
-            S = tf.zeros_like(tf.slice(z,[0,0],[-1,1]))
+            S = tf.zeros_like(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32)
             c = lambda S,i: i<self.n
             def fn(S,i):
-                #phin = tf.constant(0.0)
-                #n = tf.constant(0)
-                #cc = lambda phin,i: i<self.d
-                #def ffn(tmpphin,tmpn):
-                    #tmpphin += tf.slice(self.z,[0,self.hoppingTable[i][tmpn]],[-1,1])
-                    #return [tmpphin,tmpn]
-                #phin_,n_ = tf.while_loop(cc,ffn,[phin,n])
-                x = tf.square(tf.slice(z,[0,i],[-1,1]))
-                print(x)
-                #S += -2*self.kappa*phin_*tf.slice(self.z,[0,i],[-1,1])+phi2+self.lamb*tf.square(tf.add(phi2,-1.0))
-                S += x
-                print(S)
-                i = tf.add(i,1)
+                phin = tf.zeros_like(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32)
+                n = tf.constant(0)
+                cc = lambda phin,i: i<self.d
+                def ffn(tmpphin,tmpn):
+                    tmpphin += tf.cast(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32)
+                    tmpn += 1
+                    print(tmpphin)
+                    return [tmpphin,tmpn]
+                phin_,n_ = tf.while_loop(cc,ffn,[phin,n])
+                phi2 = tf.cast(tf.square(tf.slice(z,[0,i],[-1,1])),tf.float32)
+                S += -2*self.kappa*phin_*tf.cast(tf.slice(z,[0,i],[-1,1]),dtype=tf.float32)+phi2+self.lamb*tf.square(tf.add(phi2,-1.0))
+                i += 1
                 return [S,i]
             S_,i_ = tf.while_loop(c,fn,[S,i])
             return S_
@@ -61,7 +59,7 @@ class phi4:
         pass
     def measure(self,z):
         pass
- 
+
 if __name__ == "__main__":
     '''
     Test script
@@ -69,15 +67,14 @@ if __name__ == "__main__":
     def prior(bs,n):
         return np.random.normal(0,1,[bs,n])
     t = phi4(4,2,2,1,1)
-    print(t.hoppingTable[0][0])
     z = prior(2,4)
     #print(z)
     sess = tf.InteractiveSession()
     #print(sess.run(t.z,feed_dict={t.z:z}))
-    #print(sess.run(tf.slice(t.z,[0,1],[-1,1]),feed_dict={t.z:z}))
+    #print(sess.run(t.hoppingTable))
+    i = tf.constant(0)
+    j = tf.constant(0)
+    #print(sess.run(i))
     tmp = tf.placeholder(tf.float32,[None,4])
-    #print(sess.run(t(tmp),feed_dict={tmp:z}))
-
-
-    shape = tf.shape(tmp)
-    print(shape)
+    #print(sess.run(tf.slice(tmp,[0,t.hoppingTable[i][j]],[-1,1]),feed_dict={tmp:z}))
+    print(sess.run(t(z)))

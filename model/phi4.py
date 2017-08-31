@@ -53,12 +53,12 @@ class phi4:
             S_ = tf.reshape(S_,[-1]) +tf.reshape(tf.cast(tf.reduce_sum(tf.square(z),1) + self.lamb*tf.reduce_sum(tf.square(tf.square(z)-1),1),tf.float32),[-1])
             return S_
 
-    def mean(self,z):
-        return np.mean(z,axis=1)
-    def std(self,z):
-        return np.std(z,axis=1)
-    def measure(self,z,n):
-        return np.mean(np.power(z,n),axis=1)
+    def mean(self,z,s):
+        return np.mean(z[:,s:],axis=1)
+    def std(self,z,s):
+        return np.std(z[:,s:],axis=1)
+    def measure(self,z,n,s):
+        return np.mean(np.power(z[:,s:],n),axis=1)
 
 if __name__ == "__main__":
     '''

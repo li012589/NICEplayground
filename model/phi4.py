@@ -34,10 +34,10 @@ class phi4:
     def __call__(self,z):
         with tf.variable_scope(self.name):
             i = tf.constant(0)
-            S = tf.zeros_like(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32)
+            S = tf.zeros_like(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32) #TODO: init dynamically constant tensor
             c = lambda S,i: i<self.n
             def fn(S,i):
-                phin = tf.zeros_like(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32)
+                phin = tf.zeros_like(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32) #TODO: init dynamically constant tensor
                 n = tf.constant(0)
                 cc = lambda phin,i: i<2*self.d
                 def ffn(tmpphin,tmpn):
@@ -46,8 +46,7 @@ class phi4:
                     return [tmpphin,tmpn]
                 phin_,n_ = tf.while_loop(cc,ffn,[phin,n])
                 phi2 = tf.cast(tf.square(tf.slice(z,[0,i],[-1,1])),tf.float32)
-                S += phin_ + phi2
-                #S += -2*self.kappa*phin_*tf.cast(tf.slice(z,[0,i],[-1,1]),dtype=tf.float32)+phi2+self.lamb*tf.square(tf.add(phi2,-1.0))
+                S += -2*self.kappa*phin_*tf.cast(tf.slice(z,[0,i],[-1,1]),dtype=tf.float32)+phi2+self.lamb*tf.square(tf.add(phi2,-1.0))
                 i += 1
                 return [S,i]
             S_,i_ = tf.while_loop(c,fn,[S,i])
@@ -66,9 +65,9 @@ if __name__ == "__main__":
     '''
     def prior(bs,n):
         return np.random.normal(0,1,[bs,n])
-    t = phi4(4,2,2,1,1)
+    t = phi4(9,3,2,1,1)
     #z = prior(2,4)
-    z = np.array([[1,2,3,4],[2,3,4,5]])
+    z = np.array([[1,2,3,4,5,6,7,8,9],[2,3,4,5,6,7,8,9,10]])
     print(z)
     sess = tf.InteractiveSession()
     #print(sess.run(t.z,feed_dict={t.z:z}))

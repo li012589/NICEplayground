@@ -50,7 +50,7 @@ class phi4:
                 i += 1
                 return [S,i]
             S_,i_ = tf.while_loop(c,fn,[S,i])
-            return S_
+            return tf.reshape(S_,[-1])
 
     def mean(self,z):
         pass

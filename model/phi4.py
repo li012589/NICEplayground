@@ -54,11 +54,11 @@ class phi4:
             return S_
 
     def mean(self,z):
-        pass
+        return np.mean(z,axis=1)
     def std(self,z):
-        pass
-    def measure(self,z):
-        pass
+        return np.std(z,axis=1)
+    def measure(self,z,n):
+        return np.mean(np.power(z,n),axis=1)
 
 if __name__ == "__main__":
     '''

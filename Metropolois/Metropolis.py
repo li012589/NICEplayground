@@ -34,15 +34,25 @@ def main():
     from model.ring2d import Ring2d
     from model.doubleGaussian import doubleGaussian
     from model.phi4 import phi4
+    from hmc.hmc import HMCSampler
 
     def prior(bs):
         return np.random.normal(0,1,[bs,2])
     energyFn = Ring2d()
     MH = MHSampler(energyFn,prior)
+    HMC = HMCSampler(energyFn,prior)
     z_ = MH.sample(8000,800)
     z_ = z_[:,3000:]
     z_ = np.reshape(z_,[-1,2])
     x_,y_ = z_[:,0],z_[:,1]
+    print("MH result")
+    print(np.mean(x_))
+    print(np.std(x_))
+    z_ = HMC.sample(8000,800)
+    z_ = z_[:,3000:]
+    z_ = np.reshape(z_,[-1,2])
+    x_,y_ = z_[:,0],z_[:,1]
+    print("HMC result")
     print(np.mean(x_))
     print(np.std(x_))
 

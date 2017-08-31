@@ -45,12 +45,13 @@ class phi4:
                     tmpn += 1
                     return [tmpphin,tmpn]
                 phin_,n_ = tf.while_loop(cc,ffn,[phin,n])
-                phi2 = tf.cast(tf.square(tf.slice(z,[0,i],[-1,1])),tf.float32)
-                S += -2*self.kappa*phin_*tf.cast(tf.slice(z,[0,i],[-1,1]),dtype=tf.float32)+phi2+self.lamb*tf.square(tf.add(phi2,-1.0))
+                #phi2 = tf.cast(tf.square(tf.slice(z,[0,i],[-1,1])),tf.float32)
+                S += -2*self.kappa*phin_*tf.cast(tf.slice(z,[0,i],[-1,1]),dtype=tf.float32)#+phi2+self.lamb*tf.square(tf.add(phi2,-1.0))
                 i += 1
                 return [S,i]
             S_,i_ = tf.while_loop(c,fn,[S,i])
-            return tf.reshape(S_,[-1])
+            S_ = tf.reshape(S_,[-1]) +tf.reshape(tf.cast(tf.reduce_sum(tf.square(z),1) + self.lamb*tf.reduce_sum(tf.square(tf.square(z)-1),1),tf.float32),[-1])
+            return S_
 
     def mean(self,z):
         pass

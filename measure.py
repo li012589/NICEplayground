@@ -14,8 +14,8 @@ def prior(bs):
 if __name__ == "__main__":
     #energyFn = doubleGaussian()
     energyFn = phi4(9,3,2,1,1)
-    myhmc = HMCSampler(energyFn,prior)
-    z_ = myhmc.sample(80,8)
+    hmc = HMCSampler(energyFn,prior)
+    z_ = hmc.sample(80,8)
     z_ = z_[:,30:]
     z_ = np.reshape(z_,[-1,2])
     x_,y_ = z_[:,0],z_[:,1]

@@ -43,7 +43,6 @@ class phi4:
                 def ffn(tmpphin,tmpn):
                     tmpphin += tf.cast(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32)
                     tmpn += 1
-                    print(tmpphin)
                     return [tmpphin,tmpn]
                 phin_,n_ = tf.while_loop(cc,ffn,[phin,n])
                 phi2 = tf.cast(tf.square(tf.slice(z,[0,i],[-1,1])),tf.float32)

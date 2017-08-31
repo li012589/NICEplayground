@@ -1,0 +1,36 @@
+if __name__ =="__main__":
+    import os
+    import sys
+    sys.path.append(os.getcwd())
+
+import tensorflow as tf
+from utils.expLogger import expLogger
+from utils.MetropolisHastingsAccept import metropolisHastingsAccept
+import numpy as np
+
+class MHSampler():
+    '''
+    Tensorflow implementation for Metroplois-Hastings Monte Carlo sampler
+    '''
+    def __init__(self,energyFn,prior,std=1.0):
+        self.energyFn = energyFn
+        self.prior = prior
+        self.z = self.energyFn.z
+        def fn(z,x):
+            z_ = z+tf.random_normal(tf.shape(self.z),0.0,std)
+            accept = metropolisHastingsAccept(energyFn(z),energyFn(z_))
+            return tf.where(accept,z_,z)
+        self.steps = tf.placeholder(tf.int32,[])
+        elems = tf.zeros([self.steps])
+        self.z_ = tf.scan(fn,elems,self.z,back_prop=False)
+        self.sess = tf.InteractiveSession()
+        self.sess.run(tf.global_variables_initializer)
+    def sample(self,steps,batchSize):
+        z = self.sess.run(self.z_,feed_dict={self.steps:steps,self.z:self.prior(batchSize)})
+        z = np.transpose(z,[1,0,2])
+        return z
+def main():
+    pass
+
+if __name__ == "__main__":
+    main()

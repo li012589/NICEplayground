@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
+
 class phi4:
     '''
     A class represent the phi4 model

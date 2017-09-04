@@ -41,11 +41,11 @@ class Ising:
                 n = tf.constant(0)
                 cc = lambda I,i: i<2*self.d
                 def ffn(I,n):
-                    #I += tf.cast(tf.slice(z,[0,self.hoppingTable[i][n]],[-1,1])*z[i],tf.float32)
+                    I += tf.cast(tf.slice(z,[0,self.hoppingTable[i][n]],[-1,1]),tf.float32)
                     n += 1
                     return [I,n]
                 I,n = tf.while_loop(cc,ffn,[I,n])
-                S += I
+                S += I*tf.cast(tf.slice(z,[0,i],[-1,1]),tf.float32)
                 i += 1
                 return [S,i]
             S,i = tf.while_loop(c,fn,[S,i])
@@ -65,8 +65,8 @@ if __name__ == "__main__":
     '''
     def prior(bs,n):
         return np.random.normal(0,1,[bs,n])
-    t = Ising(4,2,2,1,1)
-    z_ = np.array([[1,2,3,4],[2,3,4,5]])
+    t = Ising(9,3,2,1,1)
+    z_ = np.array([[1,2,3,4,5,6,7,8,9],[2,3,4,5,6,7,8,9,10]])
     print(z_)
     sess = tf.InteractiveSession()
     print(sess.run(t.hoppingTable))

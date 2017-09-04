@@ -52,7 +52,7 @@ def simulateDynameics(initialPos,initialV,stepSize,steps,energyFn):
     newPos,newV,_,_ = tf.while_loop(condition,leapfrogMeta,[tmpPos,tmpV,stepSize,i])
     force = tf.gradients(tf.reduce_sum(energyFn(newPos)),newPos)[0]
     newV -= 0.5*stepSize*force
-    newPos += stepSize*newV
+    #newPos += stepSize*newV
     return newPos,newV
 
 def hmcMove(initialPos,energyFn,stepSize,steps):

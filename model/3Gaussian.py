@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-class doubleGaussian:
+class TGaussian:
     '''
     A class represent 3Gaussian, when called return the energy function value.
     '''

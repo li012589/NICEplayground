@@ -53,11 +53,11 @@ class Ising:
             S = tf.reshape(S,[-1]) - tf.reshape(self.mu*tf.cast(tf.reduce_sum(z,1),tf.float32),[-1])
             return S
     def mean(self,z,s):
-        pass
+        return np.mean(z[:,s:],axis=1)
     def std(self,z,s):
-        pass
+        return np.std(z[:,s:],axis=1)
     def measure(self,z,n,s):
-        pass
+        return np.mean(np.power(z[:,s:],n),axis=1)
 
 if __name__ == "__main__":
     '''

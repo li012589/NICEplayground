@@ -13,7 +13,7 @@ class Ising:
         self.J = J
         self.mu = mu
         self.hoppingTable = []
-        self.z = tf.placeholder(tf.flot32,[None,n])
+        self.z = tf.placeholder(tf.float32,[None,n])
         for i in range(n):
             LK = n
             y = i
@@ -41,7 +41,7 @@ class Ising:
                 n = tf.constant(0)
                 cc = lambda I,i: i<2*self.d
                 def ffn(I,n):
-                    I += tf.cast(tf.slice(z,[0,self.hoppingTable[i][n]],[-1,1])*z[i],tf.float32)
+                    #I += tf.cast(tf.slice(z,[0,self.hoppingTable[i][n]],[-1,1])*z[i],tf.float32)
                     n += 1
                     return [I,n]
                 I,n = tf.while_loop(cc,ffn,[I,n])
@@ -50,8 +50,8 @@ class Ising:
                 return [S,i]
             S,i = tf.while_loop(c,fn,[S,i])
             S *= self.J
-            S -= self.mu*tf.cast(tf.reduce_sum(z),tf.float32)
-            return tf.reshape(S,[-1])
+            S = tf.reshape(S,[-1]) - tf.reshape(self.mu*tf.cast(tf.reduce_sum(z,1),tf.float32),[-1])
+            return S
     def mean(self,z,s):
         pass
     def std(self,z,s):
@@ -60,4 +60,14 @@ class Ising:
         pass
 
 if __name__ == "__main__":
-    pass
+    '''
+    Test script
+    '''
+    def prior(bs,n):
+        return np.random.normal(0,1,[bs,n])
+    t = Ising(4,2,2,1,1)
+    z_ = np.array([[1,2,3,4],[2,3,4,5]])
+    print(z_)
+    sess = tf.InteractiveSession()
+    print(sess.run(t.hoppingTable))
+    print(sess.run(t(z_)))

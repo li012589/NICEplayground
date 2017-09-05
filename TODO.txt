@@ -1,0 +1,4 @@
+3 gaussion 
+nice sampler 
+autocorrealtion time , confirm that nice < hmc < MH
+phi^4  

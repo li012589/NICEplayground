@@ -69,15 +69,24 @@ if __name__ == "__main__":
     def dense(inputs, num_outputs, activation_fn=leaky_relu, normalizer_fn=None, normalizer_params=None):
         return tcl.fully_connected(inputs, num_outputs, activation_fn=activation_fn,normalizer_fn=normalizer_fn, normalizer_params=normalizer_params)
 
+    def netlayer(inputs,num_outputs):
+        w = np.array([[1,0],[0,1]])
+        b = np.array([[1],[1]])
+        w_ = tf.convert_to_tensor(w,dtype=tf.float32)
+        b_ = tf.convert_to_tensor(b,dtype=tf.float32)
+        ret = tf.matmul(inputs,w_)+b_
+        return ret
+
     #lrelu = leaky_relu
     #def network(x,dim):
     xDim = 2
     vDim = 2
     network = dense
     net = NiceNetwork(xDim,vDim)
-    args = [([400],'v1',False),([400],'x1',True),([400],'v2',False)]
+    #args = [([1],'v1',False),([1],'x1',True),([1],'v2',False)]
+    args = [([1],'x1',True)]
     for dims, name ,swap in args:
-        net.append(NiceLayer(dims,dense,name,swap))
+        net.append(NiceLayer(dims,netlayer,name,swap))
     z = np.array([[2,3],[1,2]])
     v = z+1
     print(z)
@@ -85,10 +94,13 @@ if __name__ == "__main__":
     z_ = tf.convert_to_tensor(z,dtype=tf.float32)
     v_ = tf.convert_to_tensor(v,dtype=tf.float32)
     inputs = [z_,v_]
-    print(inputs)
+    #print(inputs)
     ret = net.forward(inputs)
-    print(ret)
+    #print(ret)
+
+    #tmp = netlayer(z_,2)
 
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
     print(sess.run(ret))
+    #print(sess.run(tmp))

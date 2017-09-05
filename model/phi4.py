@@ -7,6 +7,14 @@ class phi4:
     A class represent the phi4 model
     '''
     def __init__(self,n,l,d,kappa,lamb,name="phi4"):
+        '''
+        Initialize computational graph.
+        :param n: int, number of points in configuration
+        :param l: int, number of points at sides
+        :param d: int, dimensions of configuration
+        :param kappa: float,
+        :param lamb: float,
+        '''
         self.name = name
         self.d = d
         self.n = n
@@ -33,6 +41,10 @@ class phi4:
                     self.hoppingTable[i].append(i-LK*(1-l))
         self.hoppingTable = tf.convert_to_tensor(self.hoppingTable,dtype=tf.int32)
     def __call__(self,z):
+        '''
+        Calcualte energy of configuration z
+        :param z: float matrix, configuration
+        '''
         with tf.variable_scope(self.name):
             i = tf.constant(0)
             S = tf.zeros_like(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32) #TODO: init dynamically constant tensor

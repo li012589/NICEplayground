@@ -28,7 +28,7 @@ def main():
     Test script for doubleGaussian
     '''
     sess = tf.InteractiveSession()
-    a = doubleGaussian("test")
+    a = TGaussian("test")
     z = np.random.normal(0,1,[2,3])
     z_ = np.array([[1,2,3],[2,3,4]])
     print(z_)

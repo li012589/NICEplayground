@@ -25,10 +25,10 @@ class NiceLayer:
         xDim = x.get_shape().as_list()[-1]
         vDim = v.get_shape().as_list()[-1]
         if self.swap:
-            t = self.add(v,xDim)
+            t = self.add(v,xDim,False)
             x = x + t
         else:
-            t = self.add(x,vDim)
+            t = self.add(x,vDim,False)
             v = v + t
         return [x,v]
     def backward(self,inputs):
@@ -36,18 +36,17 @@ class NiceLayer:
         xDim = x.get_shape().as_list()[-1]
         vDim = v.get_shape().as_list()[-1]
         if self.swap:
-            t = self.add(v,xDim)
+            t = self.add(v,xDim,True)
             x = x - t
         else:
-            t = self.add(x,vDim)
+            t = self.add(x,vDim,True)
             v = v - t
         return [x,v]
-    def add(self,x,xDim):
-        with tf.variable_scope(self.name):
-            for dim in self.dims:
-                x = self.network(x,dim)
-            x = self.network(x,xDim)
-            return x
+    def add(self,x,xDim,reuseMark):
+        for dim in self.dims:
+            x = self.network(x,dim,self.name,reuseMark)
+        x = self.network(x,xDim,self.name,reuseMark)
+        return x
 
 
 class NiceNetwork:
@@ -76,7 +75,7 @@ if __name__ == "__main__":
     def dense(inputs, num_outputs, activation_fn=leaky_relu, normalizer_fn=None, normalizer_params=None):
         return tcl.fully_connected(inputs, num_outputs, activation_fn=activation_fn,normalizer_fn=normalizer_fn, normalizer_params=normalizer_params)
 
-    def Fixlayer(inputs, num_outputs):
+    def Fixlayer(inputs, num_outputs,name,reuseMark):
         w = np.array([[1,0],[0,1]])
         b = np.array([[1],[1]])
         w_ = tf.convert_to_tensor(w,dtype=tf.float32)
@@ -84,18 +83,16 @@ if __name__ == "__main__":
         ret = tf.matmul(inputs,w_)+b_
         return ret
 
-    def randomLayer(inputs,num_outputs):
-        with tf.variable_scope("niceRandomLayer",reuse=True):
+    def randomLayer(inputs,num_outputs,name,reuseMark = None):
+        with tf.variable_scope(name,reuse=reuseMark):
             wFC = weightVariable("RandomLayerFCw",[inputs.get_shape()[-1],num_outputs])
             bFC = biasVariable("RandomLayerFC",[num_outputs])
-            print(wFC)
             fc = tf.matmul(inputs,wFC)+bFC
             fc = tf.nn.relu(fc)
             return fc
 
     #xDim = 2
     #vDim = 2
-    network = dense
     #net = NiceNetwork(xDim,vDim)
     net = NiceNetwork()
     args1 = [([10,10],'v1',False),([10,10],'x1',True),([10,10],'v2',False)]
@@ -110,6 +107,8 @@ if __name__ == "__main__":
     v_ = tf.convert_to_tensor(v,dtype=tf.float32)
     inputs_ = [z_,v_]
     ret = net.forward(inputs_)
+
+    tmp = randomLayer(z_,2,"test")
 
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
@@ -127,6 +126,5 @@ if __name__ == "__main__":
     assert (np.array_equal(inputs,backward)), "Fixlayer: input doesn't match backward"
     print("Input matched backward")
 
-    tmp = randomLayer(z_,2)
     print(sess.run(tmp))
 

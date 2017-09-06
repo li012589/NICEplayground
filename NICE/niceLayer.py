@@ -68,12 +68,6 @@ if __name__ == "__main__":
     Test script
     '''
     from utils.parameterInit import weightVariable, biasVariable
-    import tensorflow.contrib.layers as tcl
-    def leaky_relu(x, alpha=0.2):
-        return tf.maximum(tf.minimum(0.0, alpha * x), x)
-
-    def dense(inputs, num_outputs, activation_fn=leaky_relu, normalizer_fn=None, normalizer_params=None):
-        return tcl.fully_connected(inputs, num_outputs, activation_fn=activation_fn,normalizer_fn=normalizer_fn, normalizer_params=normalizer_params)
 
     def Fixlayer(inputs, num_outputs,name,reuseMark):
         #print(name)
@@ -92,9 +86,6 @@ if __name__ == "__main__":
             fc = tf.nn.relu(fc)
             return fc
 
-    #xDim = 2
-    #vDim = 2
-    #net = NiceNetwork(xDim,vDim)
     net = NiceNetwork()
     args1 = [([10,5,3],'v1',False),([10,10],'x1',True),([10,10],'v2',False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
@@ -113,11 +104,9 @@ if __name__ == "__main__":
     sess.run(tf.global_variables_initializer())
     forward = (sess.run(ret))
     print("forwarding")
-    #print(forward)
     zp_ = tf.convert_to_tensor(forward[0],dtype=tf.float32)
     vp_ = tf.convert_to_tensor(forward[1],dtype=tf.float32)
     forward_ = [zp_,vp_]
-    #print(forward_)
     retp = net.backward(forward_)
     backward = sess.run(retp)
     print("backwarding")

@@ -1,3 +1,8 @@
+if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.append(os.getcwd())
+
 import tensorflow as tf
 import numpy as np
 
@@ -46,10 +51,8 @@ class NiceLayer:
 
 
 class NiceNetwork:
-    def __init__(self,xDim,vDim):
+    def __init__(self):
         self.layers = []
-        self.xDim = xDim
-        self.vDim = vDim
     def append(self,layer):
         self.layers.append(layer)
     def forward(self,inputs):
@@ -62,6 +65,10 @@ class NiceNetwork:
         return inputs
 
 if __name__ == "__main__":
+    '''
+    Test script
+    '''
+    from utils.parameterInit import weightVariable, biasVariable
     import tensorflow.contrib.layers as tcl
     def leaky_relu(x, alpha=0.2):
         return tf.maximum(tf.minimum(0.0, alpha * x), x)
@@ -69,43 +76,57 @@ if __name__ == "__main__":
     def dense(inputs, num_outputs, activation_fn=leaky_relu, normalizer_fn=None, normalizer_params=None):
         return tcl.fully_connected(inputs, num_outputs, activation_fn=activation_fn,normalizer_fn=normalizer_fn, normalizer_params=normalizer_params)
 
-    def Fixlayer(inputs,num_outputs):
+    def Fixlayer(inputs, num_outputs):
         w = np.array([[1,0],[0,1]])
         b = np.array([[1],[1]])
         w_ = tf.convert_to_tensor(w,dtype=tf.float32)
         b_ = tf.convert_to_tensor(b,dtype=tf.float32)
         ret = tf.matmul(inputs,w_)+b_
         return ret
-    def randomLayer(input,num_outputs):
-        pass
 
-    xDim = 2
-    vDim = 2
+    def randomLayer(inputs,num_outputs):
+        with tf.variable_scope("niceRandomLayer",reuse=True):
+            wFC = weightVariable("RandomLayerFCw",[inputs.get_shape()[-1],num_outputs])
+            bFC = biasVariable("RandomLayerFC",[num_outputs])
+            print(wFC)
+            fc = tf.matmul(inputs,wFC)+bFC
+            fc = tf.nn.relu(fc)
+            return fc
+
+    #xDim = 2
+    #vDim = 2
     network = dense
-    net = NiceNetwork(xDim,vDim)
-    args1 = [([1],'v1',False),([1],'x1',True),([1],'v2',False)]
+    #net = NiceNetwork(xDim,vDim)
+    net = NiceNetwork()
+    args1 = [([10,10],'v1',False),([10,10],'x1',True),([10,10],'v2',False)]
     args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
-    for dims, name ,swap in args:
+    for dims, name ,swap in args1:
         net.append(NiceLayer(dims,Fixlayer,name,swap))
-    z = np.array([[2,3],[1,2]])
+    z = np.array([[2,3],[1,2]],dtype=np.float32)
     v = z+1
-    print(z)
-    print(v)
+    inputs=[z,v]
+    #print(inputs)
     z_ = tf.convert_to_tensor(z,dtype=tf.float32)
     v_ = tf.convert_to_tensor(v,dtype=tf.float32)
-    inputs = [z_,v_]
-    ret = net.forward(inputs)
+    inputs_ = [z_,v_]
+    ret = net.forward(inputs_)
 
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
     forward = (sess.run(ret))
-    print("forward:")
-    print(forward)
+    print("forwarding")
+    #print(forward)
     zp_ = tf.convert_to_tensor(forward[0],dtype=tf.float32)
     vp_ = tf.convert_to_tensor(forward[1],dtype=tf.float32)
     forward_ = [zp_,vp_]
     #print(forward_)
     retp = net.backward(forward_)
     backward = sess.run(retp)
-    print("backward")
-    print(backward)
+    print("backwarding")
+    #print(backward)
+    assert (np.array_equal(inputs,backward)), "Fixlayer: input doesn't match backward"
+    print("Input matched backward")
+
+    tmp = randomLayer(z_,2)
+    print(sess.run(tmp))
+

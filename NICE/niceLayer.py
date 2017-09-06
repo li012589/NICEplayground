@@ -43,9 +43,9 @@ class NiceLayer:
             v = v - t
         return [x,v]
     def add(self,x,xDim,reuseMark):
-        for dim in self.dims:
-            x = self.network(x,dim,self.name,reuseMark)
-        x = self.network(x,xDim,self.name,reuseMark)
+        for i, dim in enumerate(self.dims):
+            x = self.network(x,dim,self.name+str(i)+"thLayer",reuseMark)
+        x = self.network(x,xDim,self.name+str(i+1)+"thLayer",reuseMark)
         return x
 
 
@@ -76,6 +76,7 @@ if __name__ == "__main__":
         return tcl.fully_connected(inputs, num_outputs, activation_fn=activation_fn,normalizer_fn=normalizer_fn, normalizer_params=normalizer_params)
 
     def Fixlayer(inputs, num_outputs,name,reuseMark):
+        #print(name)
         w = np.array([[1,0],[0,1]])
         b = np.array([[1],[1]])
         w_ = tf.convert_to_tensor(w,dtype=tf.float32)
@@ -95,20 +96,18 @@ if __name__ == "__main__":
     #vDim = 2
     #net = NiceNetwork(xDim,vDim)
     net = NiceNetwork()
-    args1 = [([10,10],'v1',False),([10,10],'x1',True),([10,10],'v2',False)]
-    args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
+    args1 = [([10,5,3],'v1',False),([10,10],'x1',True),([10,10],'v2',False)]
+    #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,swap in args1:
-        net.append(NiceLayer(dims,Fixlayer,name,swap))
+        net.append(NiceLayer(dims,randomLayer,name,swap))
     z = np.array([[2,3],[1,2]],dtype=np.float32)
     v = z+1
     inputs=[z,v]
-    #print(inputs)
+    print(inputs)
     z_ = tf.convert_to_tensor(z,dtype=tf.float32)
     v_ = tf.convert_to_tensor(v,dtype=tf.float32)
     inputs_ = [z_,v_]
     ret = net.forward(inputs_)
-
-    tmp = randomLayer(z_,2,"test")
 
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
@@ -122,9 +121,6 @@ if __name__ == "__main__":
     retp = net.backward(forward_)
     backward = sess.run(retp)
     print("backwarding")
-    #print(backward)
-    assert (np.array_equal(inputs,backward)), "Fixlayer: input doesn't match backward"
+    print(backward)
+    assert (np.allclose(inputs,backward)), "Fixlayer: input doesn't match backward"
     print("Input matched backward")
-
-    print(sess.run(tmp))
-

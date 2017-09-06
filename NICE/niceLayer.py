@@ -58,7 +58,7 @@ class NiceNetwork:
         return inputs
     def backward(self,inputs):
         for layer in self.layers:
-            inputs = layer.backward()
+            inputs = layer.backward(inputs)
         return inputs
 
 if __name__ == "__main__":
@@ -69,24 +69,24 @@ if __name__ == "__main__":
     def dense(inputs, num_outputs, activation_fn=leaky_relu, normalizer_fn=None, normalizer_params=None):
         return tcl.fully_connected(inputs, num_outputs, activation_fn=activation_fn,normalizer_fn=normalizer_fn, normalizer_params=normalizer_params)
 
-    def netlayer(inputs,num_outputs):
+    def Fixlayer(inputs,num_outputs):
         w = np.array([[1,0],[0,1]])
         b = np.array([[1],[1]])
         w_ = tf.convert_to_tensor(w,dtype=tf.float32)
         b_ = tf.convert_to_tensor(b,dtype=tf.float32)
         ret = tf.matmul(inputs,w_)+b_
         return ret
+    def randomLayer(input,num_outputs):
+        pass
 
-    #lrelu = leaky_relu
-    #def network(x,dim):
     xDim = 2
     vDim = 2
     network = dense
     net = NiceNetwork(xDim,vDim)
-    #args = [([1],'v1',False),([1],'x1',True),([1],'v2',False)]
-    args = [([1],'x1',True)]
+    args1 = [([1],'v1',False),([1],'x1',True),([1],'v2',False)]
+    args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,swap in args:
-        net.append(NiceLayer(dims,netlayer,name,swap))
+        net.append(NiceLayer(dims,Fixlayer,name,swap))
     z = np.array([[2,3],[1,2]])
     v = z+1
     print(z)
@@ -94,13 +94,18 @@ if __name__ == "__main__":
     z_ = tf.convert_to_tensor(z,dtype=tf.float32)
     v_ = tf.convert_to_tensor(v,dtype=tf.float32)
     inputs = [z_,v_]
-    #print(inputs)
     ret = net.forward(inputs)
-    #print(ret)
-
-    #tmp = netlayer(z_,2)
 
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
-    print(sess.run(ret))
-    #print(sess.run(tmp))
+    forward = (sess.run(ret))
+    print("forward:")
+    print(forward)
+    zp_ = tf.convert_to_tensor(forward[0],dtype=tf.float32)
+    vp_ = tf.convert_to_tensor(forward[1],dtype=tf.float32)
+    forward_ = [zp_,vp_]
+    #print(forward_)
+    retp = net.backward(forward_)
+    backward = sess.run(retp)
+    print("backward")
+    print(backward)

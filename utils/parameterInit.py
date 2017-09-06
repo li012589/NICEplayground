@@ -1,9 +1,9 @@
 import tensorflow as tf
 
-def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev = 0.01)
-    return tf.Variable(initial)
+def weightVariable(name,shape):
+    initial = tf.get_variable(name,shape,dtype=tf.float32, initializer=tf.truncated_normal_initializer(stddev=0.02))
+    return initial
 
-def bias_variable(shape):
-    initial = tf.constant(0.01, shape = shape)
-    return tf.Variable(initial)
+def biasVariable(name,shape):
+    initial = tf.get_variable(name,shape,initializer=tf.constant_initializer(0.01))
+    return initial

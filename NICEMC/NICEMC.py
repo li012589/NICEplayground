@@ -86,7 +86,8 @@ if __name__ == "__main__":
     #v = tf.random_normal([z_.get_shape().as_list()[0],vDim])
     #inputs = [z_,v]
     #net.forward(inputs)
-    ret = Operator(inputs,2,3,True)
+    steps = tf.constant(10)
+    ret = Operator(inputs,steps,vDim,True)
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
     print(sess.run(ret))

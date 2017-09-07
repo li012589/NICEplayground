@@ -34,7 +34,7 @@ class NiceNetworkOperator:
         return tf.scan(fn,elems,inputs,back_prop=False)
 
 class NICEMCSampler:
-    def __init__(self,energyFn,prior,network,discriminator,b,m):
+    def __init__(self,energyFn,prior,network,discriminator,b,m,scale=10.0,eta=1.0):
         self.energyFn = energyFn
         self.prior = prior
         self.Operator = NiceNetworkOperator(network,energyFn)
@@ -74,6 +74,28 @@ class NICEMCSampler:
         zConcated = tf.concat([tf.concat([z2,self.x],1),tf.concat([z3,z1],1)],0)
         #vConcated = tf.reshape(tf.concat([v1,v2,v3],1),[-1,self.vDim])
         vConcated = tf.concat([v1,v2,v3],1)
+        reallyData = tf.reshape(self.reallyData,[-1,2*self.zDim])
+        batchDate = tf.reshape(self.batchDate,[-1,2*self.zDim])
+
+        rD = self.discriminator(reallyData)
+        fD = self.discriminator(zConcated)
+
+        epsilon = tf.random_uniform([],0.0,1.0)
+        hat = batchDate*epsilon + zConcated*(1-epsilon)
+        hatD = self.discriminator(hat)
+        gradientHatD = tf.gradients(hatD,hat)[0]
+        gradientHatD = tf.norm(gradientHatD)
+        gradientHatD = tf.reduce_mean(tf.square(gradientHatD-1.0)*scale)
+        self.Dloss = tf.reduce_mean(rD)-tf.reduce_mean(fD)+gradientHatD
+        self.Gloss = tf.reduce_mean(fD)+tf.reduce_mean(0.5*tf.multiply(vConcated,vConcated))*eta
+
+        GVar = [var for var in tf.global_variables() if 'generator' in var.name]
+        DVar = [var for var in tf.global_variables() if 'discriminator' in var.name]
+
+        self.trainD = tf.train.AdamOptimizer().minimize(self.Dloss,var_list=DVar)
+        self.trainG = tf.train.AdamOptimizer().minimize(self.Gloss,var_list=GVar)
+
+        self.sess.run(tf.global_variables_initializer())
 
     def sample(self,steps,batchSize):
         pass

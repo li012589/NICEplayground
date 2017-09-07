@@ -7,20 +7,21 @@ import tensorflow as tf
 import numpy as np
 from NICE.niceLayer import NiceLayer,NiceNetwork
 from utils.MetropolisHastingsAccept import metropolisHastingsAccept
+from utils.hamiltonian import hamiltonian
+from utils.expLogger import expLogger
 
 class NiceNetworkOperator:
     def __init__(self,network,energyFn):
         self.network = lambda inputs,t: tf.cond(t>0.5,lambda: network.forward(inputs),lambda: network.backward(inputs))
         self.energyFn = energyFn
+        self.explog = expLogger({})
     def __call__(self,inputs,steps,vDim,ifMH):
-        def networkInterface(inputs,direction):
-            return tf.cond(direction,self.network.forward(inputs),self.network.backward(inputs))
         if ifMH:
             def fn(zv,step):
                 z,v = zv
                 v = tf.random_normal([z.get_shape().as_list()[0],vDim])
-                z_,v_ = self.network([z,v],(tf.random_uniform([]) < 0.5))
-                accept = metropolisHastingsAccept(self.energyFn(z,v))
+                z_,v_ = self.network([z,v],tf.random_uniform([]))
+                accept = metropolisHastingsAccept(hamiltonian(z,v,self.energyFn),hamiltonian(z_,v_,self.energyFn),self.explog)
                 z_ = tf.where(accept,z_,z)
                 return z_,v_
         else:
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     #v = tf.random_normal([z_.get_shape().as_list()[0],vDim])
     #inputs = [z_,v]
     #net.forward(inputs)
-    ret = Operator(inputs,2,3,False)
+    ret = Operator(inputs,2,3,True)
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
     print(sess.run(ret))

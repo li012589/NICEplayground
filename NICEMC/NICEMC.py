@@ -34,13 +34,47 @@ class NiceNetworkOperator:
         return tf.scan(fn,elems,inputs,back_prop=False)
 
 class NICEMCSampler:
-    def __init__(self,energyFn,prior,generator,discriminator,b,m):
+    def __init__(self,energyFn,prior,network,discriminator,b,m):
         self.energyFn = energyFn
         self.prior = prior
-        self.generator = generator
+        self.Operator = NiceNetworkOperator(network,energyFn)
+        self.network = network
         self.discriminator = discriminator
-        self.b = b
-        self.m = m
+        self.b = tf.to_int32(tf.reshape(tf.multinomial(tf.ones([1, b]), 1), [])) + 1 # Random chose from [1,b]
+        self.m = tf.to_int32(tf.reshape(tf.multinomial(tf.ones([1, m]), 1), [])) + 1
+        self.zDim = energyFn.z.get_shape().as_list()[1]
+        self.vDim = self.xDim
+        self.sess = tf.InteractiveSession()
+
+        self.z = tf.placeholder(tf.float32,[None,self.zDim])
+        self.reallyData = tf.placeholder(tf.float32,[None,self.zDim])
+        self.batchDate = tf.placeholder(tf.float32,[None,self.zDim])
+
+        zBatchSize = tf.shape(self.z)[0]
+        rdBatchSize = tf.shape(self.reallyData)[0]
+
+        v = tf.random_normal(zBatchSize,self.zDim)
+        self.steps = tf.placeholder(tf.int32,[])
+        self.z_,self.v_ = self.Operator((self.z,v),self.steps,True)
+
+        v_ = tf.random_normal([zBatchSize,self.zDim])
+        z1,v1 = self.Operator((self.z,v_),self.b)
+        z1 = z1[-1]
+        v1 = v1[-1]
+        z1_ = tf.stop_gradient(z1)
+        v1_ = tf.random_normal([rdBatchSize,self.zDim])
+        z2,v2 = self.Operator((self.x,v1_),self.m)
+        z2 = z2[-1]
+        v2 = v2[-1]
+        v2_ = tf.random_normal([zBatchSize,self.zDim])
+        z3,v3 = self.Operator((z1_,v2_),self.m)
+        z3 = z3[-1]
+        v3 = v3[-1]
+
+        zConcated = tf.concat([tf.concat([z2,self.x],1),tf.concat([z3,z1],1)],0)
+        #vConcated = tf.reshape(tf.concat([v1,v2,v3],1),[-1,self.vDim])
+        vConcated = tf.concat([v1,v2,v3],1)
+
     def sample(self,steps,batchSize):
         pass
     def train(self):
@@ -83,9 +117,6 @@ if __name__ == "__main__":
     vDim = 3
     v_ = tf.random_normal([z_.get_shape().as_list()[0],vDim])
     inputs = (z_,v_)
-    #v = tf.random_normal([z_.get_shape().as_list()[0],vDim])
-    #inputs = [z_,v]
-    #net.forward(inputs)
     steps = tf.constant(10)
     ret = Operator(inputs,steps,vDim,True)
     sess = tf.InteractiveSession()

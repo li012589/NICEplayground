@@ -6,25 +6,8 @@ if __name__ =="__main__":
 import tensorflow as tf
 from utils.expLogger import expLogger
 from utils.MetropolisHastingsAccept import metropolisHastingsAccept
+from utils.hamiltonian import hamiltonian
 import numpy as np
-
-def kineticEnergy(v):
-    '''
-    Return the value of the kineticEnergy
-    :param v: velocity variable
-    :return: kineticEnergy
-    '''
-    return 0.5*tf.reduce_sum(tf.multiply(v,v),axis=1)
-
-def hamiltonian(p,v,f):
-    '''
-    Return the value of the Hamiltonian
-    :param p: position variable
-    :param v: velocity variable
-    :param f: energy function
-    :return: hamiltonian
-    '''
-    return f(p)+kineticEnergy(v)
 
 def simulateDynameics(initialPos,initialV,stepSize,steps,energyFn):
     """

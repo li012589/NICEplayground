@@ -7,7 +7,7 @@ import tensorflow as tf
 import numpy as np
 
 class NiceLayer:
-    def __init__(self,dims,network,name="niceLayer",swap=False):
+    def __init__(self,dims,network,active,name="niceLayer",swap=False):
         '''
         NICE Layer that takes in [x, v] as input and updates one of them.
         Note that for NICE, the Jacobian is always 1; but we keep it for
@@ -16,38 +16,28 @@ class NiceLayer:
         :param name: string, TensorFlow variable name scope for variable reuse.
         :param swap: bool, Update x if True, or update v if False.
         '''
-        self.dims = dims
+        #self.dims = dims
         self.name = name
         self.swap = swap
-        self.network = network
+        self.network = network(dims,active,name+"/innerNiceLayer")
     def forward(self,inputs):
         x,v = inputs
-        xDim = x.get_shape().as_list()[-1]
-        vDim = v.get_shape().as_list()[-1]
         if self.swap:
-            t = self.add(v,xDim,False)
+            t = self.network(v)
             x = x + t
         else:
-            t = self.add(x,vDim,False)
+            t = self.network(x)
             v = v + t
         return [x,v]
     def backward(self,inputs):
         x,v = inputs
-        xDim = x.get_shape().as_list()[-1]
-        vDim = v.get_shape().as_list()[-1]
         if self.swap:
-            t = self.add(v,xDim,True)
+            t = self.network(v)
             x = x - t
         else:
-            t = self.add(x,vDim,True)
+            t = self.network(x)
             v = v - t
         return [x,v]
-    def add(self,x,xDim,reuseMark):
-        for i, dim in enumerate(self.dims):
-            x = self.network(x,dim,self.name+str(i)+"thLayer",reuseMark)
-        x = self.network(x,xDim,self.name+str(i+1)+"thLayer",reuseMark)
-        return x
-
 
 class NiceNetwork:
     def __init__(self):
@@ -68,6 +58,7 @@ if __name__ == "__main__":
     Test script
     '''
     from utils.parameterInit import weightVariable, biasVariable
+    from utils.mlp import mlp
 
     def Fixlayer(inputs, num_outputs,name,reuseMark):
         #print(name)
@@ -87,10 +78,10 @@ if __name__ == "__main__":
             return fc
 
     net = NiceNetwork()
-    args1 = [([10,5,3],'v1',False),([10,10],'x1',True),([10,10],'v2',False)]
+    args1 = [([[2,10],[10,5],[5,2]],'v1',False),([[2,10],[10,2]],'x1',True),([[2,4],[4,2]],'v2',False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,swap in args1:
-        net.append(NiceLayer(dims,randomLayer,name,swap))
+        net.append(NiceLayer(dims,mlp,tf.nn.relu,name,swap))
     z = np.array([[2,3],[1,2]],dtype=np.float32)
     v = z+1
     inputs=[z,v]

@@ -90,7 +90,8 @@ if __name__ == "__main__":
     v_ = tf.convert_to_tensor(v,dtype=tf.float32)
     inputs_ = [z_,v_]
     ret = net.forward(inputs_)
-
+    ret2 = net.forward(inputs_)
+    ret2_ = net.backward(ret2)
     sess = tf.InteractiveSession()
     sess.run(tf.global_variables_initializer())
     forward = (sess.run(ret))
@@ -104,3 +105,9 @@ if __name__ == "__main__":
     print(backward)
     assert (np.allclose(inputs,backward)), "Fixlayer: input doesn't match backward"
     print("Input matched backward")
+    print("2nd test:")
+    print("forward")
+    print(sess.run(ret2))
+    print("backward")
+    ret2_r = sess.run(ret2_)
+    assert (np.allclose(inputs,ret2_r)), "Fixlayer: input doesn't match backward"

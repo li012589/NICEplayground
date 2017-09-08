@@ -19,7 +19,8 @@ class NiceNetworkOperator:
         if ifMH:
             def fn(zv,step):
                 z,v = zv
-                v = tf.random_normal([z.get_shape().as_list()[0],vDim])
+                #print(z)
+                v = tf.random_normal([tf.shape(z)[0],vDim])
                 z_,v_ = self.network([z,v],tf.random_uniform([]))
                 accept = metropolisHastingsAccept(hamiltonian(z,v,self.energyFn),hamiltonian(z_,v_,self.energyFn),self.explog)
                 z_ = tf.where(accept,z_,z)
@@ -43,7 +44,7 @@ class NICEMCSampler:
         self.b = tf.to_int32(tf.reshape(tf.multinomial(tf.ones([1, b]), 1), [])) + 1 # Random chose from [1,b]
         self.m = tf.to_int32(tf.reshape(tf.multinomial(tf.ones([1, m]), 1), [])) + 1
         self.zDim = energyFn.z.get_shape().as_list()[1]
-        self.vDim = self.xDim
+        self.vDim = self.zDim
         self.sess = tf.InteractiveSession()
 
         self.z = tf.placeholder(tf.float32,[None,self.zDim])
@@ -53,21 +54,21 @@ class NICEMCSampler:
         zBatchSize = tf.shape(self.z)[0]
         rdBatchSize = tf.shape(self.reallyData)[0]
 
-        v = tf.random_normal(zBatchSize,self.zDim)
+        v = tf.random_normal([zBatchSize,self.zDim])
         self.steps = tf.placeholder(tf.int32,[])
-        self.z_,self.v_ = self.Operator((self.z,v),self.steps,True)
+        self.z_,self.v_ = self.Operator((self.z,v),self.steps,self.vDim,True)
 
         v_ = tf.random_normal([zBatchSize,self.zDim])
-        z1,v1 = self.Operator((self.z,v_),self.b)
+        z1,v1 = self.Operator((self.z,v_),self.b,self.vDim,False)
         z1 = z1[-1]
         v1 = v1[-1]
         z1_ = tf.stop_gradient(z1)
         v1_ = tf.random_normal([rdBatchSize,self.zDim])
-        z2,v2 = self.Operator((self.x,v1_),self.m)
+        z2,v2 = self.Operator((self.reallyData,v1_),self.m,self.vDim,False)
         z2 = z2[-1]
         v2 = v2[-1]
         v2_ = tf.random_normal([zBatchSize,self.zDim])
-        z3,v3 = self.Operator((z1_,v2_),self.m)
+        z3,v3 = self.Operator((z1_,v2_),self.m,self.vDim,False)
         z3 = z3[-1]
         v3 = v3[-1]
 
@@ -108,6 +109,7 @@ if __name__ == "__main__":
     '''
     from utils.parameterInit import weightVariable, biasVariable
     from model.TGaussian import TGaussian
+    from utils.mlp import mlp
 
     mod = TGaussian("test")
 
@@ -128,6 +130,9 @@ if __name__ == "__main__":
             fc = tf.nn.relu(fc)
             return fc
 
+    def prior(batchSize):
+        return np.random.normal(0,1,[batchSize,3])
+
     net = NiceNetwork()
     args1 = [([10,5,3],'v1',False),([10,10],'x1',True),([10,10],'v2',False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
@@ -139,8 +144,15 @@ if __name__ == "__main__":
     vDim = 3
     v_ = tf.random_normal([z_.get_shape().as_list()[0],vDim])
     inputs = (z_,v_)
-    steps = tf.constant(10)
+    steps = tf.constant(5)
     ret = Operator(inputs,steps,vDim,True)
     sess = tf.InteractiveSession()
+    ret2 = Operator(ret,steps,vDim,True)
     sess.run(tf.global_variables_initializer())
-    print(sess.run(ret))
+    print(sess.run(ret2))
+
+
+    b = 5
+    m = 10
+    dnet = mlp([[3,40],[40,30],[30,5],[5,3]],tf.nn.relu,"discriminator")
+    #sampler = NICEMCSampler(mod,prior,net,dnet,b,m)

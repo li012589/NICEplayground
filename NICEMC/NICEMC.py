@@ -72,7 +72,7 @@ class NICEMCSampler:
         z3 = z3[-1]
         v3 = v3[-1]
 
-        zConcated = tf.concat([tf.concat([z2,self.x],1),tf.concat([z3,z1],1)],0)
+        zConcated = tf.concat([tf.concat([z2,self.reallyData],1),tf.concat([z3,z1],1)],0)
         #vConcated = tf.reshape(tf.concat([v1,v2,v3],1),[-1,self.vDim])
         vConcated = tf.concat([v1,v2,v3],1)
         reallyData = tf.reshape(self.reallyData,[-1,2*self.zDim])
@@ -93,8 +93,13 @@ class NICEMCSampler:
         GVar = [var for var in tf.global_variables() if 'generator' in var.name]
         DVar = [var for var in tf.global_variables() if 'discriminator' in var.name]
 
+        print(self.Gloss)
+        print("GVar")
+        for i in GVar:
+            print(i)
+
         self.trainD = tf.train.AdamOptimizer().minimize(self.Dloss,var_list=DVar)
-        self.trainG = tf.train.AdamOptimizer().minimize(self.Gloss,var_list=GVar)
+        #self.trainG = tf.train.AdamOptimizer().minimize(self.Gloss,var_list=GVar)
 
         self.sess.run(tf.global_variables_initializer())
 
@@ -133,25 +138,33 @@ if __name__ == "__main__":
 
     mod = TGaussian("test")
     net = NiceNetwork()
-    args1 = [([[3,10],[10,5],[5,3]],'v1',False),([[3,10],[10,3]],'x1',True),([[3,4],[4,3]],'v2',False)]
+    args1 = [([[3,10],[10,5],[5,3]],'generator/v1',False),([[3,10],[10,3]],'generator/x1',True),([[3,4],[4,3]],'generator/v2',False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,swap in args1:
         net.append(NiceLayer(dims,mlp,tf.nn.relu,name,swap))
-    Operator = NiceNetworkOperator(net,mod)
-    z = np.array([[1,2,3],[2,3,4]])
-    z_ = tf.convert_to_tensor(z,dtype=tf.float32)
-    vDim = 3
-    v_ = tf.random_normal([z_.get_shape().as_list()[0],vDim])
-    inputs = (z_,v_)
-    steps = tf.constant(5)
-    ret = Operator(inputs,steps,vDim,True)
+    #Operator = NiceNetworkOperator(net,mod)
+    #z = np.array([[0,0.1,-0.1],[0,0.1,0.1]])
+    #z_ = tf.convert_to_tensor(z,dtype=tf.float32)
+    #vDim = 3
+    #v_ = tf.random_normal([z_.get_shape().as_list()[0],vDim])
+    #inputs = (z_,v_)
+    #print("input")
+    #print(inputs)
+    #steps = tf.constant(10)
+    #ret = Operator(inputs,steps,vDim,True)
+    #z1_,v1_ = ret
+    #ret = tf.reshape(ret,[-1,ret.get_shape().as_list()[-1]])
+    #v1_ = tf.random_normal([z_.get_shape().as_list()[0],vDim])
+    #print("ret")
+    #print(ret)
     sess = tf.InteractiveSession()
-    #ret2 = Operator(ret,steps,vDim,True)
-    sess.run(tf.global_variables_initializer())
-    print(sess.run(ret))
-
-
     b = 5
     m = 10
-    dnet = mlp([[3,40],[40,30],[30,5],[5,3]],tf.nn.relu,"discriminator")
-    #sampler = NICEMCSampler(mod,prior,net,dnet,b,m)
+    dnet = mlp([[6,40],[40,30],[30,5],[5,1]],tf.nn.relu,"discriminator")
+    sampler = NICEMCSampler(mod,prior,net,dnet,b,m)
+    sess.run(tf.global_variables_initializer())
+    summary_writer = tf.summary.FileWriter("./test/",graph=tf.get_default_graph())
+    summary_writer.flush()
+
+    #ret2 = Operator(ret,steps,vDim,True)
+    #print(sess.run(ret))

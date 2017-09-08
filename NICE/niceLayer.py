@@ -96,6 +96,7 @@ if __name__ == "__main__":
     sess.run(tf.global_variables_initializer())
     forward = (sess.run(ret))
     print("forwarding")
+    print(forward)
     zp_ = tf.convert_to_tensor(forward[0],dtype=tf.float32)
     vp_ = tf.convert_to_tensor(forward[1],dtype=tf.float32)
     forward_ = [zp_,vp_]
@@ -103,11 +104,14 @@ if __name__ == "__main__":
     backward = sess.run(retp)
     print("backwarding")
     print(backward)
-    assert (np.allclose(inputs,backward)), "Fixlayer: input doesn't match backward"
+    assert (np.allclose(inputs,backward)), "Input doesn't match backward"
     print("Input matched backward")
     print("2nd test:")
     print("forward")
-    print(sess.run(ret2))
+    ret2r = sess.run(ret2)
+    print(ret2r)
     print("backward")
     ret2_r = sess.run(ret2_)
-    assert (np.allclose(inputs,ret2_r)), "Fixlayer: input doesn't match backward"
+    print(ret2_r)
+    assert (np.allclose(inputs,ret2_r)), "Input doesn't match backward"
+    assert (np.allclose(forward,ret2r)), "First forward doesn't math second forward, the parameter in inner layer may not be same'"

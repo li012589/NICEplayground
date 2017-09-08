@@ -17,6 +17,7 @@ class NiceNetworkOperator:
         self.explog = expLogger({})
     def __call__(self,inputs,steps,vDim,ifMH):
         if ifMH:
+            flag = False
             def fn(zv,step):
                 z,v = zv
                 #print(z)
@@ -26,13 +27,14 @@ class NiceNetworkOperator:
                 z_ = tf.where(accept,z_,z)
                 return z_,v_
         else:
+            flag = True
             def fn(zv,step):
                z, v = zv
                v = tf.random_normal(shape=tf.stack([tf.shape(z)[0],vDim]))
                z_, v_ = self.network([z,v],tf.constant(1,dtype=tf.float32))
                return z_, v_
         elems = tf.zeros([steps])
-        return tf.scan(fn,elems,inputs,back_prop=False)
+        return tf.scan(fn,elems,inputs,back_prop=flag)
 
 class NICEMCSampler:
     def __init__(self,energyFn,prior,network,discriminator,b,m,scale=10.0,eta=1.0):
@@ -93,13 +95,13 @@ class NICEMCSampler:
         GVar = [var for var in tf.global_variables() if 'generator' in var.name]
         DVar = [var for var in tf.global_variables() if 'discriminator' in var.name]
 
-        print(self.Gloss)
-        print("GVar")
-        for i in GVar:
-            print(i)
+        #print(self.Gloss)
+        #print("GVar")
+        #for i in GVar:
+            #print(i)
 
         self.trainD = tf.train.AdamOptimizer().minimize(self.Dloss,var_list=DVar)
-        #self.trainG = tf.train.AdamOptimizer().minimize(self.Gloss,var_list=GVar)
+        self.trainG = tf.train.AdamOptimizer().minimize(self.Gloss,var_list=GVar)
 
         self.sess.run(tf.global_variables_initializer())
 

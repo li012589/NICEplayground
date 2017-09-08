@@ -111,8 +111,6 @@ if __name__ == "__main__":
     from model.TGaussian import TGaussian
     from utils.mlp import mlp
 
-    mod = TGaussian("test")
-
     def Fixlayer(inputs, num_outputs,name,reuseMark):
         #print(name)
         w = np.array([[1,0],[0,1]])
@@ -133,11 +131,12 @@ if __name__ == "__main__":
     def prior(batchSize):
         return np.random.normal(0,1,[batchSize,3])
 
+    mod = TGaussian("test")
     net = NiceNetwork()
-    args1 = [([10,5,3],'v1',False),([10,10],'x1',True),([10,10],'v2',False)]
+    args1 = [([[3,10],[10,5],[5,3]],'v1',False),([[3,10],[10,3]],'x1',True),([[3,4],[4,3]],'v2',False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,swap in args1:
-        net.append(NiceLayer(dims,randomLayer,name,swap))
+        net.append(NiceLayer(dims,mlp,tf.nn.relu,name,swap))
     Operator = NiceNetworkOperator(net,mod)
     z = np.array([[1,2,3],[2,3,4]])
     z_ = tf.convert_to_tensor(z,dtype=tf.float32)
@@ -147,9 +146,9 @@ if __name__ == "__main__":
     steps = tf.constant(5)
     ret = Operator(inputs,steps,vDim,True)
     sess = tf.InteractiveSession()
-    ret2 = Operator(ret,steps,vDim,True)
+    #ret2 = Operator(ret,steps,vDim,True)
     sess.run(tf.global_variables_initializer())
-    print(sess.run(ret2))
+    print(sess.run(ret))
 
 
     b = 5

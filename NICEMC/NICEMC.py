@@ -24,6 +24,9 @@ class NiceNetworkOperator:
                 v = tf.random_normal([tf.shape(z)[0],vDim])
                 z_,v_ = self.network([z,v],tf.random_uniform([]))
                 accept = metropolisHastingsAccept(hamiltonian(z,v,self.energyFn),hamiltonian(z_,v_,self.energyFn),self.explog)
+                #accept = tf.convert_to_tensor(np.array([[1,0,1]]),tf.bool)
+                #accept = tf.ones_like(z_,tf.bool)
+                #accept = tf.zeros_like(z_,tf.bool)
                 z_ = tf.where(accept,z_,z)
                 return z_,v_
         else:
@@ -169,7 +172,7 @@ if __name__ == "__main__":
     summary_writer = tf.summary.FileWriter("./test/",graph=tf.get_default_graph())
     summary_writer.flush()
 
-    z,v = sampler.sample(12,3)
+    z,v = sampler.sample(10,1)
     print(z)
 
     #ret2 = Operator(ret,steps,vDim,True)

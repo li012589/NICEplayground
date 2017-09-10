@@ -12,7 +12,7 @@ from utils.expLogger import expLogger
 
 class NiceNetworkOperator:
     def __init__(self,network,energyFn):
-        self.network = lambda inputs,t: tf.cond(t>0.5,lambda: network.forward(inputs),lambda: network.backward(inputs))
+        self.network = lambda inputs,t:tf.cond(t>0.5,lambda: network.forward(inputs),lambda: network.backward(inputs))
         self.energyFn = energyFn
         self.explog = expLogger({})
     def __call__(self,inputs,steps,vDim,ifMH):
@@ -106,7 +106,8 @@ class NICEMCSampler:
         self.sess.run(tf.global_variables_initializer())
 
     def sample(self,steps,batchSize):
-        pass
+        z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
+        return z,v
     def train(self):
         pass
 
@@ -167,6 +168,9 @@ if __name__ == "__main__":
     sess.run(tf.global_variables_initializer())
     summary_writer = tf.summary.FileWriter("./test/",graph=tf.get_default_graph())
     summary_writer.flush()
+
+    z,v = sampler.sample(12,3)
+    print(z)
 
     #ret2 = Operator(ret,steps,vDim,True)
     #print(sess.run(ret))

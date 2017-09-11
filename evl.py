@@ -11,6 +11,7 @@ from model.phi4 import phi4
 from hmc.hmc import HMCSampler
 from Metropolois.Metropolis import MHSampler
 from utils.autoCorrelation import autoCorrelationTime
+from utils.acceptRate import acceptance_rate
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 

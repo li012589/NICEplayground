@@ -193,14 +193,14 @@ if __name__ == "__main__":
     #v1_ = tf.random_normal([z_.get_shape().as_list()[0],vDim])
     #print("ret")
     #print(ret)
-    sess = tf.InteractiveSession()
+    #sess = tf.InteractiveSession()
     b = 5
     m = 10
     dnet = mlp([[6,40],[40,30],[30,5],[5,1]],tf.nn.relu,"discriminator")
     sampler = NICEMCSampler(mod,prior,net,dnet,b,m)
-    sess.run(tf.global_variables_initializer())
-    summary_writer = tf.summary.FileWriter("./test/",graph=tf.get_default_graph())
-    summary_writer.flush()
+    #sess.run(tf.global_variables_initializer())
+    #summary_writer = tf.summary.FileWriter("./test/",graph=tf.get_default_graph())
+    #summary_writer.flush()
 
     z,v = sampler.sample(10,1)
     print(z)

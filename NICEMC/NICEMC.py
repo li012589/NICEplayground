@@ -9,6 +9,28 @@ from NICE.niceLayer import NiceLayer,NiceNetwork
 from utils.MetropolisHastingsAccept import metropolisHastingsAccept
 from utils.hamiltonian import hamiltonian
 from utils.expLogger import expLogger
+#from utils.buff import Buffer
+
+class Buffer:
+    def __init__(self,data):
+        self.data = data
+        #self.perm = np.random.permutation(self.data.shape[0])
+        #self.pointer = 0
+    def insert(self,data):
+        self.data = np.concatenate([self.data,data],axis=0)
+        #self.perm = np.random.permutation(self.data.shape[0])
+        #self.pointer = 0
+    def discard(self,ratio):
+        size = self.data.shape[0]
+        perm = np.random.permutation(size)
+        self.data = self.data[perm[:int(size*(1-ratio))]]
+        #self.perm = np.random.permutation(self.data.shap[0])
+        #self.pointer = 0
+    def __call__(self,batchSize):
+        if self.pointer+batchSize >= self.data.shape[0]:
+            batchSize = self.data.shape[0]
+        perm = np.random.permutation(self.data.shape[0])
+        return self.data(perm[:batchSize])
 
 class NiceNetworkOperator:
     def __init__(self,network,energyFn):
@@ -55,6 +77,7 @@ class NICEMCSampler:
         self.z = tf.placeholder(tf.float32,[None,self.zDim])
         self.reallyData = tf.placeholder(tf.float32,[None,self.zDim])
         self.batchDate = tf.placeholder(tf.float32,[None,self.zDim])
+        #self.buff = Buffer({})
 
         zBatchSize = tf.shape(self.z)[0]
         rdBatchSize = tf.shape(self.reallyData)[0]
@@ -78,8 +101,8 @@ class NICEMCSampler:
         v3 = v3[-1]
 
         zConcated = tf.concat([tf.concat([z2,self.reallyData],1),tf.concat([z3,z1],1)],0)
-        #vConcated = tf.reshape(tf.concat([v1,v2,v3],1),[-1,self.vDim])
-        vConcated = tf.concat([v1,v2,v3],1)
+        vConcated = tf.reshape(tf.concat([v1,v2,v3],1),[-1,self.vDim])
+        #vConcated = tf.concat([v1,v2,v3],1)
         reallyData = tf.reshape(self.reallyData,[-1,2*self.zDim])
         batchDate = tf.reshape(self.batchDate,[-1,2*self.zDim])
 
@@ -109,10 +132,14 @@ class NICEMCSampler:
         self.sess.run(tf.global_variables_initializer())
 
     def sample(self,steps,batchSize):
+        def feed_dict(batchSize):
+            return{self.z:self.prior(batchSize),self.reallyData:self.buff(batchSize),self.batchDate:self.buff(batchSize)}
         z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
         return z,v
-    def train(self):
+    def train(self,trainSteps,epochSteps,totalEpoch,bootstrapBatchSize,bootstrapBurnIn,logSteps):
         pass
+        #for epoch in xrange(totalEpoch):
+            #self.sess.run(self.Gloss,feed_dict={feed_dict()})
 
 if __name__ == "__main__":
     '''

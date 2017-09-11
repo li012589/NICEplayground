@@ -9,6 +9,8 @@ from NICE.niceLayer import NiceLayer,NiceNetwork
 from utils.MetropolisHastingsAccept import metropolisHastingsAccept
 from utils.hamiltonian import hamiltonian
 from utils.expLogger import expLogger
+from utils.autoCorrelation import autoCorrelationTime
+from utils.acceptRate import acceptance_rate
 #from utils.buff import Buffer
 
 class Buffer:
@@ -134,7 +136,7 @@ class NICEMCSampler:
     def sample(self,steps,batchSize):
         z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
         return z,v
-    def train(self,trainSteps,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps):
+    def train(self,trainSteps,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize):
         def feed_dict(batchSize):
             return{self.z:self.prior(batchSize),self.reallyData:self.buff(batchSize),self.batchDate:self.buff(4*batchSize)}
         for t in range(totalSteps):
@@ -143,6 +145,19 @@ class NICEMCSampler:
                 z = np.reshape(z[:,bootstrapBurnIn:],[-1,z.shape[-1]])
                 self.buff.discard(0.5)
                 self.buff.insert(z)
+                z,v = self.sample(evlSteps+evlBurnIn,evlBatchSize)
+                z = z[:,evlBurnIn:]
+                autoCorrelation = autoCorrelationTime(z,7)
+                acceptRate = acceptance_rate(z)
+                print('Acceptance Rate: [%f]'%(acceptRate))
+                print('Autocorrelation Time: [%f]' %(autoCorrelation))
+            if t % logSteps == 0:
+                Dloss = self.sess.run(self.Dloss,feed_dict={feed_dict(evlBatchSize)})
+                Gloss = self.sess.run(self.Gloss,feed_dict={feed_dict(evlBatchSize)})
+                print("Discriminator Loss: [%f]; Generator Loss: [%f]"%(Dloss),(Gloss))
+            for i in range(dTrainSteps):
+                self.sess.run(self.trainD,feed_dict={feed_dict(trainBatchSize)})
+            self.sess.run(self.trainG,feed_dict={feed_dict(trainBatchSize)})
 
 if __name__ == "__main__":
     '''

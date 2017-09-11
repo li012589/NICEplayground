@@ -16,21 +16,15 @@ from utils.acceptRate import acceptance_rate
 class Buffer:
     def __init__(self,data):
         self.data = data
-        #self.perm = np.random.permutation(self.data.shape[0])
-        #self.pointer = 0
     def insert(self,data):
         if self.data.shape[0] == 0:
             self.data = data
         else:
             self.data = np.concatenate([self.data,data],axis=0)
-        #self.perm = np.random.permutation(self.data.shape[0])
-        #self.pointer = 0
     def discard(self,ratio):
         size = self.data.shape[0]
         perm = np.random.permutation(size)
         self.data = self.data[perm[:int(size*(1-ratio))]]
-        #self.perm = np.random.permutation(self.data.shap[0])
-        #self.pointer = 0
     def __call__(self,batchSize):
         if batchSize >= self.data.shape[0]:
             batchSize = self.data.shape[0]
@@ -47,12 +41,9 @@ class NiceNetworkOperator:
             flag = False
             def fn(zv,step):
                 z,v = zv
-                #print(z)
                 v = tf.random_normal([tf.shape(z)[0],vDim])
                 z_,v_ = self.network([z,v],tf.random_uniform([]))
                 accept = metropolisHastingsAccept(hamiltonian(z,v,self.energyFn),hamiltonian(z_,v_,self.energyFn),self.explog)
-                #print(accept)
-                #print(z_)
                 #accept = tf.convert_to_tensor(np.array([[1,0,1]]),tf.bool)
                 #accept = tf.ones_like(z_,tf.bool)
                 #accept = tf.zeros_like(z_,tf.bool)
@@ -129,11 +120,6 @@ class NICEMCSampler:
         GVar = [var for var in tf.global_variables() if 'generator' in var.name]
         DVar = [var for var in tf.global_variables() if 'discriminator' in var.name]
 
-        #print(self.Gloss)
-        #print("GVar")
-        #for i in GVar:
-            #print(i)
-
         self.trainD = tf.train.AdamOptimizer().minimize(self.Dloss,var_list=DVar)
         self.trainG = tf.train.AdamOptimizer().minimize(self.Gloss,var_list=GVar)
 
@@ -143,8 +129,6 @@ class NICEMCSampler:
         z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
         return z,v
     def train(self,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize):
-        def feedDict(batchSize):
-            return{self.z:self.prior(batchSize),self.reallyData:self.buff(batchSize),self.batchDate:self.buff(4*batchSize)}
         for t in range(totalSteps):
             if t % epochSteps == 0:
                 z,v = self.sample(bootstrapSteps+bootstrapBurnIn,bootstrapBatchSize)
@@ -158,13 +142,13 @@ class NICEMCSampler:
                 print('Acceptance Rate: [%f]'%(acceptRate))
                 print('Autocorrelation Time: [%f]' %(autoCorrelation))
             if t % logSteps == 0:
-                Dloss = self.sess.run(self.Dloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})#feedDict(evlBatchSize)})
-                Gloss = self.sess.run(self.Gloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})#feedDict(evlBatchSize)})
+                Dloss = self.sess.run(self.Dloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})
+                Gloss = self.sess.run(self.Gloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})
                 print("Discriminator Loss: [%f]"%(Dloss))
                 print("Generator Loss: [%f]"%(Gloss))
             for i in range(dTrainSteps):
-                self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})#feedDict(trainBatchSize)})
-            self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})#feedDict(trainBatchSize)})
+                self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
+            self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
 
 if __name__ == "__main__":
     '''
@@ -206,6 +190,4 @@ if __name__ == "__main__":
     #print(np.mean(z0))
     #print(np.std(z0))
 
-    #b = Buffer(np.array([]))
-    #b.insert(np.array([[1,2],[1,2]]))
     sampler.train(2,10,10,5,5,2,2,10,5,2,2)

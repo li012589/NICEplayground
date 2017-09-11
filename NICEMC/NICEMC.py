@@ -77,7 +77,7 @@ class NICEMCSampler:
         self.z = tf.placeholder(tf.float32,[None,self.zDim])
         self.reallyData = tf.placeholder(tf.float32,[None,self.zDim])
         self.batchDate = tf.placeholder(tf.float32,[None,self.zDim])
-        #self.buff = Buffer({})
+        self.buff = Buffer(np.array([]))
 
         zBatchSize = tf.shape(self.z)[0]
         rdBatchSize = tf.shape(self.reallyData)[0]
@@ -132,14 +132,17 @@ class NICEMCSampler:
         self.sess.run(tf.global_variables_initializer())
 
     def sample(self,steps,batchSize):
-        def feed_dict(batchSize):
-            return{self.z:self.prior(batchSize),self.reallyData:self.buff(batchSize),self.batchDate:self.buff(batchSize)}
         z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
         return z,v
-    def train(self,trainSteps,epochSteps,totalEpoch,bootstrapBatchSize,bootstrapBurnIn,logSteps):
-        pass
-        #for epoch in xrange(totalEpoch):
-            #self.sess.run(self.Gloss,feed_dict={feed_dict()})
+    def train(self,trainSteps,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps):
+        def feed_dict(batchSize):
+            return{self.z:self.prior(batchSize),self.reallyData:self.buff(batchSize),self.batchDate:self.buff(4*batchSize)}
+        for t in range(totalSteps):
+            if t % epochSteps == 0:
+                z,v = self.sample(bootstrapSteps+bootstrapBurnIn,bootstrapBatchSize)
+                z = np.reshape(z[:,bootstrapBurnIn:],[-1,z.shape[-1]])
+                self.buff.discard(0.5)
+                self.buff.insert(z)
 
 if __name__ == "__main__":
     '''

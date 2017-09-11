@@ -19,7 +19,10 @@ class Buffer:
         #self.perm = np.random.permutation(self.data.shape[0])
         #self.pointer = 0
     def insert(self,data):
-        self.data = np.concatenate([self.data,data],axis=0)
+        if self.data.shape[0] == 0:
+            self.data = data
+        else:
+            self.data = np.concatenate([self.data,data],axis=0)
         #self.perm = np.random.permutation(self.data.shape[0])
         #self.pointer = 0
     def discard(self,ratio):
@@ -29,10 +32,10 @@ class Buffer:
         #self.perm = np.random.permutation(self.data.shap[0])
         #self.pointer = 0
     def __call__(self,batchSize):
-        if self.pointer+batchSize >= self.data.shape[0]:
+        if batchSize >= self.data.shape[0]:
             batchSize = self.data.shape[0]
         perm = np.random.permutation(self.data.shape[0])
-        return self.data(perm[:batchSize])
+        return self.data[perm[:batchSize]]
 
 class NiceNetworkOperator:
     def __init__(self,network,energyFn):
@@ -139,28 +142,29 @@ class NICEMCSampler:
     def sample(self,steps,batchSize):
         z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
         return z,v
-    def train(self,trainSteps,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize):
-        def feed_dict(batchSize):
+    def train(self,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize):
+        def feedDict(batchSize):
             return{self.z:self.prior(batchSize),self.reallyData:self.buff(batchSize),self.batchDate:self.buff(4*batchSize)}
         for t in range(totalSteps):
             if t % epochSteps == 0:
                 z,v = self.sample(bootstrapSteps+bootstrapBurnIn,bootstrapBatchSize)
-                z = np.reshape(z[:,bootstrapBurnIn:],[-1,z.shape[-1]])
+                z = np.reshape(z[bootstrapBurnIn:,:],[-1,z.shape[-1]])
                 self.buff.discard(0.5)
                 self.buff.insert(z)
                 z,v = self.sample(evlSteps+evlBurnIn,evlBatchSize)
-                z = z[:,evlBurnIn:]
-                autoCorrelation = autoCorrelationTime(z,7)
-                acceptRate = acceptance_rate(z)
+                z = z[evlBurnIn:,:]
+                autoCorrelation = autoCorrelationTime(z,2)
+                acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
                 print('Acceptance Rate: [%f]'%(acceptRate))
                 print('Autocorrelation Time: [%f]' %(autoCorrelation))
             if t % logSteps == 0:
-                Dloss = self.sess.run(self.Dloss,feed_dict={feed_dict(evlBatchSize)})
-                Gloss = self.sess.run(self.Gloss,feed_dict={feed_dict(evlBatchSize)})
-                print("Discriminator Loss: [%f]; Generator Loss: [%f]"%(Dloss),(Gloss))
+                Dloss = self.sess.run(self.Dloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})#feedDict(evlBatchSize)})
+                Gloss = self.sess.run(self.Gloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})#feedDict(evlBatchSize)})
+                print("Discriminator Loss: [%f]"%(Dloss))
+                print("Generator Loss: [%f]"%(Gloss))
             for i in range(dTrainSteps):
-                self.sess.run(self.trainD,feed_dict={feed_dict(trainBatchSize)})
-            self.sess.run(self.trainG,feed_dict={feed_dict(trainBatchSize)})
+                self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})#feedDict(trainBatchSize)})
+            self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})#feedDict(trainBatchSize)})
 
 if __name__ == "__main__":
     '''
@@ -184,44 +188,24 @@ if __name__ == "__main__":
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,swap in args1:
         net.append(NiceLayer(dims,mlp,tf.nn.relu,name,swap))
-    #Operator = NiceNetworkOperator(net,mod)
-    #z = np.array([[0,0.1,-0.1],[0,0.1,0.1]])
-    #z_ = tf.convert_to_tensor(z,dtype=tf.float32)
-    #vDim = 3
-    #v_ = tf.random_normal([z_.get_shape().as_list()[0],vDim])
-    #inputs = (z_,v_)
-    #print("input")
-    #print(inputs)
-    #steps = tf.constant(10)
-    #ret = Operator(inputs,steps,vDim,True)
-    #z1_,v1_ = ret
-    #ret = tf.reshape(ret,[-1,ret.get_shape().as_list()[-1]])
-    #v1_ = tf.random_normal([z_.get_shape().as_list()[0],vDim])
-    #print("ret")
-    #print(ret)
-    #sess = tf.InteractiveSession()
     b = 5
     m = 10
     dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],tf.nn.relu,"discriminator")
     sampler = NICEMCSampler(mod,prior,net,dnet,b,m)
-    #sess.run(tf.global_variables_initializer())
-    #summary_writer = tf.summary.FileWriter("./test/",graph=tf.get_default_graph())
-    #summary_writer.flush()
 
-    z,v = sampler.sample(8000,100)
+    #z,v = sampler.sample(8000,100)
     #print(z)
-    print(z.shape)
-    z = z[1000:,:]
+    #print(z.shape)
+    #z = z[1000:,:]
     #print(z)
-    print(z.shape)
-    acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
-    print(acceptRate)
-    z_ = np.reshape(z,[-1,2])
-    z0 = z_[:,0]
-    print(np.mean(z0))
-    print(np.std(z0))
-    #ret2 = Operator(ret,steps,vDim,True)
-    #print(sess.run(ret))
-    '''
-    test for niceLayer
-    '''
+    #print(z.shape)
+    #acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
+    #print(acceptRate)
+    #z_ = np.reshape(z,[-1,2])
+    #z0 = z_[:,0]
+    #print(np.mean(z0))
+    #print(np.std(z0))
+
+    #b = Buffer(np.array([]))
+    #b.insert(np.array([[1,2],[1,2]]))
+    sampler.train(2,10,10,5,5,2,2,10,5,2,2)

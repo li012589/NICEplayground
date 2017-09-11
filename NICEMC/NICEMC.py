@@ -36,7 +36,7 @@ class Buffer:
 
 class NiceNetworkOperator:
     def __init__(self,network,energyFn):
-        self.network = lambda inputs,t:tf.cond(t>0.5,lambda: network.forward(inputs),lambda: network.backward(inputs))
+        self.network = lambda inputs,t:tf.cond(t>=0.5,lambda: network.forward(inputs),lambda: network.backward(inputs))
         self.energyFn = energyFn
         self.explog = expLogger({})
     def __call__(self,inputs,steps,vDim,ifMH):
@@ -48,6 +48,8 @@ class NiceNetworkOperator:
                 v = tf.random_normal([tf.shape(z)[0],vDim])
                 z_,v_ = self.network([z,v],tf.random_uniform([]))
                 accept = metropolisHastingsAccept(hamiltonian(z,v,self.energyFn),hamiltonian(z_,v_,self.energyFn),self.explog)
+                #print(accept)
+                #print(z_)
                 #accept = tf.convert_to_tensor(np.array([[1,0,1]]),tf.bool)
                 #accept = tf.ones_like(z_,tf.bool)
                 #accept = tf.zeros_like(z_,tf.bool)
@@ -87,6 +89,7 @@ class NICEMCSampler:
         v = tf.random_normal([zBatchSize,self.zDim])
         self.steps = tf.placeholder(tf.int32,[])
         self.z_,self.v_ = self.Operator((self.z,v),self.steps,self.vDim,True)
+        #self.z_ = tf.transpose(self.z_,[1,0,2])
 
         v_ = tf.random_normal([zBatchSize,self.zDim])
         z1,v1 = self.Operator((self.z,v_),self.b,self.vDim,False)
@@ -165,31 +168,19 @@ if __name__ == "__main__":
     '''
     from utils.parameterInit import weightVariable, biasVariable
     from model.TGaussian import TGaussian
+    from model.ring2d import Ring2d
+    from model.phi4 import phi4
     from utils.mlp import mlp
 
-    def Fixlayer(inputs, num_outputs,name,reuseMark):
-        #print(name)
-        w = np.array([[1,0],[0,1]])
-        b = np.array([[1],[1]])
-        w_ = tf.convert_to_tensor(w,dtype=tf.float32)
-        b_ = tf.convert_to_tensor(b,dtype=tf.float32)
-        ret = tf.matmul(inputs,w_)+b_
-        return ret
-
-    def randomLayer(inputs,num_outputs,name,reuseMark = None):
-        with tf.variable_scope(name,reuse=reuseMark):
-            wFC = weightVariable("RandomLayerFCw",[inputs.get_shape()[-1],num_outputs])
-            bFC = biasVariable("RandomLayerFC",[num_outputs])
-            fc = tf.matmul(inputs,wFC)+bFC
-            fc = tf.nn.relu(fc)
-            return fc
-
+    s = 2
     def prior(batchSize):
-        return np.random.normal(0,1,[batchSize,3])
+        return np.random.normal(0,1,[batchSize,s])
 
-    mod = TGaussian("test")
+    #mod = TGaussian("test")
+    mod = Ring2d("test")
+    #mod = phi4(9,3,2,1,1)
     net = NiceNetwork()
-    args1 = [([[3,10],[10,5],[5,3]],'generator/v1',False),([[3,10],[10,3]],'generator/x1',True),([[3,4],[4,3]],'generator/v2',False)]
+    args1 = [([[s,400],[400,s]],'generator/v1',False),([[s,400],[400,s]],'generator/x1',True),([[s,400],[400,s]],'generator/v2',False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,swap in args1:
         net.append(NiceLayer(dims,mlp,tf.nn.relu,name,swap))
@@ -211,14 +202,26 @@ if __name__ == "__main__":
     #sess = tf.InteractiveSession()
     b = 5
     m = 10
-    dnet = mlp([[6,40],[40,30],[30,5],[5,1]],tf.nn.relu,"discriminator")
+    dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],tf.nn.relu,"discriminator")
     sampler = NICEMCSampler(mod,prior,net,dnet,b,m)
     #sess.run(tf.global_variables_initializer())
     #summary_writer = tf.summary.FileWriter("./test/",graph=tf.get_default_graph())
     #summary_writer.flush()
 
-    z,v = sampler.sample(10,1)
-    print(z)
-
+    z,v = sampler.sample(8000,100)
+    #print(z)
+    print(z.shape)
+    z = z[1000:,:]
+    #print(z)
+    print(z.shape)
+    acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
+    print(acceptRate)
+    z_ = np.reshape(z,[-1,2])
+    z0 = z_[:,0]
+    print(np.mean(z0))
+    print(np.std(z0))
     #ret2 = Operator(ret,steps,vDim,True)
     #print(sess.run(ret))
+    '''
+    test for niceLayer
+    '''

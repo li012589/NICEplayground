@@ -139,10 +139,21 @@ class NICEMCSampler:
             print("No loading, starting sampler from random parameter")
         z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
         return z,v
-    def train(self,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize,saveSteps,ifSummary,ifload,savePath):
+    def train(self,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize,saveSteps,ifSummary,ifload):
         saver = tf.train.Saver()
         checkpoint = tf.train.get_checkpoint_state(self.savePath)
+        if ifload:
+            if checkpoint and checkpoint.model_checkpoint_path:
+                saver.restore(self.sess,checkpoint.model_checkpoint_path)
+            else:
+                print("Loading failed, staring training from random parameter")
+        else:
+            print("No loading, starting training from random parameter")
         if ifSummary:
+            tfGloss = tf.Variable(0.0)
+            tfDloss = tf.Variable(0.0)
+            tf.summary.scalar("Gloss", tfGloss)
+            tf.summary.scalar("Dloss", tfDloss)
             writer = tf.summary.FileWriter(self.summaryPath, self.sess.graph)
         for t in range(totalSteps):
             if t % epochSteps == 0:
@@ -165,7 +176,11 @@ class NICEMCSampler:
                 self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
             self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
             if t % saveSteps:
-                pass
+                if ifSummary:
+                    summary = self.sess.run(tf.summary.merge_all(),feed_dict={tfDloss:Dloss,tfGloss:Gloss})
+                    writer.add_summary(summary,t)
+                    writer.flush()
+                saver.save(self.sess, self.savePath+'-nice', global_step = t)
 
 if __name__ == "__main__":
     '''

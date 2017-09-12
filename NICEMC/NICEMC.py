@@ -157,11 +157,11 @@ class NICEMCSampler:
             writer = tf.summary.FileWriter(self.summaryPath, self.sess.graph)
         for t in range(totalSteps):
             if t % epochSteps == 0:
-                z,v = self.sample(bootstrapSteps+bootstrapBurnIn,bootstrapBatchSize)
+                z,v = self.sample(bootstrapSteps+bootstrapBurnIn,bootstrapBatchSize,False,False)
                 z = np.reshape(z[bootstrapBurnIn:,:],[-1,z.shape[-1]])
                 self.buff.discard(0.5)
                 self.buff.insert(z)
-                z,v = self.sample(evlSteps+evlBurnIn,evlBatchSize)
+                z,v = self.sample(evlSteps+evlBurnIn,evlBatchSize,False,False)
                 z = z[evlBurnIn:,:]
                 autoCorrelation = autoCorrelationTime(z,2)
                 acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
@@ -178,7 +178,7 @@ class NICEMCSampler:
                     summary = self.sess.run(tf.summary.merge_all(),feed_dict={tfDloss:Dloss,tfGloss:Gloss})
                     writer.add_summary(summary,t)
                     writer.flush()
-                saver.save(self.sess, self.savePath+'-nice', global_step = t)
+                saver.save(self.sess, self.savePath+'/nice', global_step = t)
                 print("Net parameter saved")
 
 if __name__ == "__main__":

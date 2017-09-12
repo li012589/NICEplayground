@@ -3,3 +3,7 @@
 **/.DS_Store
 **/test.py
 test/*
+tfSummary/*
+!tfSummary/placehodler
+savedNetwork/*
+!savedNetwork/placeholder

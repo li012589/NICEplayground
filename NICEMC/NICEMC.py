@@ -13,6 +13,9 @@ from utils.autoCorrelation import autoCorrelationTime
 from utils.acceptRate import acceptance_rate
 #from utils.buff import Buffer
 
+def leaky_relu(x, alpha=0.2):
+    return tf.maximum(tf.minimum(0.0, alpha * x), x)
+
 class Buffer:
     def __init__(self,data):
         self.data = data
@@ -205,7 +208,7 @@ if __name__ == "__main__":
         net.append(NiceLayer(dims,mlp,active,name,swap))
     b = 5
     m = 10
-    dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],tf.nn.relu,"discriminator")
+    dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],leaky_relu,"discriminator")
     sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
     '''
     z,v = sampler.sample(80000,1000)
@@ -225,4 +228,4 @@ if __name__ == "__main__":
     print(np.std(z1))
     '''
 
-    sampler.train(2,10,10,5,5,2,2,10,5,2,2,2,True,False)
+    sampler.train(2,10,10,5,5,2,2,10,5,2,2,2,True,True)

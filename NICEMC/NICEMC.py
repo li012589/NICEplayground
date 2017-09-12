@@ -199,10 +199,10 @@ if __name__ == "__main__":
     mod = Ring2d("test")
     #mod = phi4(9,3,2,1,1)
     net = NiceNetwork()
-    args1 = [([[s,400],[400,s]],'generator/v1',False),([[s,400],[400,s]],'generator/x1',True),([[s,400],[400,s]],'generator/v2',False)]
+    args1 = [([[s,400],[400,s]],'generator/v1',tf.nn.relu,False),([[s,400],[400,s]],'generator/x1',tf.nn.relu,True),([[s,400],[400,s]],'generator/v2',tf.identity,False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
-    for dims, name ,swap in args1:
-        net.append(NiceLayer(dims,mlp,tf.nn.relu,name,swap))
+    for dims, name ,active, swap in args1:
+        net.append(NiceLayer(dims,mlp,active,name,swap))
     b = 5
     m = 10
     dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],tf.nn.relu,"discriminator")
@@ -225,4 +225,4 @@ if __name__ == "__main__":
     print(np.std(z1))
     '''
 
-    sampler.train(2,10,10,5,5,2,2,10,5,2,2,2,True,True)
+    sampler.train(2,10,10,5,5,2,2,10,5,2,2,2,True,False)

@@ -60,7 +60,7 @@ class NiceNetworkOperator:
         return tf.scan(fn,elems,inputs,back_prop=flag)
 
 class NICEMCSampler:
-    def __init__(self,energyFn,prior,network,discriminator,b,m,scale=10.0,eta=1.0):
+    def __init__(self,energyFn,prior,network,discriminator,b,m,savePath,summaryPath,scale=10.0,eta=1.0):
         self.energyFn = energyFn
         self.prior = prior
         self.Operator = NiceNetworkOperator(network,energyFn)
@@ -70,6 +70,8 @@ class NICEMCSampler:
         self.m = tf.to_int32(tf.reshape(tf.multinomial(tf.ones([1, m]), 1), [])) + 1
         self.zDim = energyFn.z.get_shape().as_list()[1]
         self.vDim = self.zDim
+        self.savePath = savePath
+        self.summaryPath = summaryPath
         self.sess = tf.InteractiveSession()
 
         self.z = tf.placeholder(tf.float32,[None,self.zDim])
@@ -125,10 +127,23 @@ class NICEMCSampler:
 
         self.sess.run(tf.global_variables_initializer())
 
-    def sample(self,steps,batchSize):
+    def sample(self,steps,batchSize,ifload=False):
+        if ifload:
+            saver = tf.train.Saver()
+            checkpoint = tf.train.get_checkpoint_state(self.savePath)
+            if checkpoint and checkpoint.model_checkpoint_path:
+                saver.restore(self.sess, checkpoint.model_checkpoint_path)
+            else:
+                print("Loading failed, starting sampler from random parameter")
+        else:
+            print("No loading, starting sampler from random parameter")
         z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
         return z,v
-    def train(self,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize):
+    def train(self,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize,saveSteps,ifSummary,ifload,savePath):
+        saver = tf.train.Saver()
+        checkpoint = tf.train.get_checkpoint_state(self.savePath)
+        if ifSummary:
+            writer = tf.summary.FileWriter(self.summaryPath, self.sess.graph)
         for t in range(totalSteps):
             if t % epochSteps == 0:
                 z,v = self.sample(bootstrapSteps+bootstrapBurnIn,bootstrapBatchSize)
@@ -149,6 +164,8 @@ class NICEMCSampler:
             for i in range(dTrainSteps):
                 self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
             self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
+            if t % saveSteps:
+                pass
 
 if __name__ == "__main__":
     '''
@@ -175,19 +192,22 @@ if __name__ == "__main__":
     b = 5
     m = 10
     dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],tf.nn.relu,"discriminator")
-    sampler = NICEMCSampler(mod,prior,net,dnet,b,m)
+    sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 
-    #z,v = sampler.sample(8000,100)
+    z,v = sampler.sample(80000,1000)
     #print(z)
-    #print(z.shape)
-    #z = z[1000:,:]
+    print(z.shape)
+    z = z[1000:,:]
     #print(z)
-    #print(z.shape)
-    #acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
-    #print(acceptRate)
-    #z_ = np.reshape(z,[-1,2])
-    #z0 = z_[:,0]
-    #print(np.mean(z0))
-    #print(np.std(z0))
+    print(z.shape)
+    acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
+    print(acceptRate)
+    z_ = np.reshape(z,[-1,2])
+    z0,z1 = z_[:,0],z_[:,1]
+    print(np.mean(z0))
+    print(np.std(z0))
 
-    sampler.train(2,10,10,5,5,2,2,10,5,2,2)
+    print(np.mean(z1))
+    print(np.std(z1))
+
+    #sampler.train(2,10,10,5,5,2,2,10,5,2,2,2)

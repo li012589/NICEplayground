@@ -127,19 +127,19 @@ class NICEMCSampler:
 
         self.sess.run(tf.global_variables_initializer())
 
-    def sample(self,steps,batchSize,ifload=False):
+    def sample(self,steps,batchSize,ifload=False,echo=True):
         if ifload:
             saver = tf.train.Saver()
             checkpoint = tf.train.get_checkpoint_state(self.savePath)
             if checkpoint and checkpoint.model_checkpoint_path:
                 saver.restore(self.sess, checkpoint.model_checkpoint_path)
-            else:
+            elif echo:
                 print("Loading failed, starting sampler from random parameter")
-        else:
+        elif echo:
             print("No loading, starting sampler from random parameter")
         z,v = self.sess.run([self.z_,self.v_], feed_dict={self.z:self.prior(batchSize),self.steps:steps})
         return z,v
-    def train(self,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize,saveSteps,ifSummary,ifload):
+    def train(self,epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize,saveSteps,ifSummary = True,ifload = False):
         saver = tf.train.Saver()
         checkpoint = tf.train.get_checkpoint_state(self.savePath)
         if ifload:
@@ -165,13 +165,11 @@ class NICEMCSampler:
                 z = z[evlBurnIn:,:]
                 autoCorrelation = autoCorrelationTime(z,2)
                 acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
-                print('Acceptance Rate: [%f]'%(acceptRate))
-                print('Autocorrelation Time: [%f]' %(autoCorrelation))
+                print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
             if t % logSteps == 0:
                 Dloss = self.sess.run(self.Dloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})
                 Gloss = self.sess.run(self.Gloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})
-                print("Discriminator Loss: [%f]"%(Dloss))
-                print("Generator Loss: [%f]"%(Gloss))
+                print("Discriminator Loss:",(Dloss),"Generator Loss:",(Gloss))
             for i in range(dTrainSteps):
                 self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
             self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
@@ -181,6 +179,7 @@ class NICEMCSampler:
                     writer.add_summary(summary,t)
                     writer.flush()
                 saver.save(self.sess, self.savePath+'-nice', global_step = t)
+                print("Net parameter saved")
 
 if __name__ == "__main__":
     '''
@@ -208,7 +207,7 @@ if __name__ == "__main__":
     m = 10
     dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],tf.nn.relu,"discriminator")
     sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
-
+    '''
     z,v = sampler.sample(80000,1000)
     #print(z)
     print(z.shape)
@@ -224,5 +223,6 @@ if __name__ == "__main__":
 
     print(np.mean(z1))
     print(np.std(z1))
+    '''
 
-    #sampler.train(2,10,10,5,5,2,2,10,5,2,2,2)
+    sampler.train(2,10,10,5,5,2,2,10,5,2,2,2,True,True)

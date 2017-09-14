@@ -176,7 +176,7 @@ class NICEMCSampler:
             for i in range(dTrainSteps):
                 self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
             self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
-            if t % saveSteps:
+            if t % saveSteps == 0:
                 if ifSummary:
                     summary = self.sess.run(tf.summary.merge_all(),feed_dict={tfDloss:Dloss,tfGloss:Gloss})
                     writer.add_summary(summary,t)
@@ -228,4 +228,5 @@ if __name__ == "__main__":
     print(np.std(z1))
     '''
 
-    sampler.train(2,10,10,5,5,2,2,10,5,2,2,2,True,True)
+    #sampler.train(2,10,10,5,5,2,2,10,5,2,2,2,True,True)
+    sampler.train(500,100000,5000,32,1000,100,32,5000,1000,5,32,100,True,False)

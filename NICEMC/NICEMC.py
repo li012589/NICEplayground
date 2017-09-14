@@ -168,11 +168,11 @@ class NICEMCSampler:
                 z = z[evlBurnIn:,:]
                 autoCorrelation = autoCorrelationTime(z,2)
                 acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
-                print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
+                print('At step: ',t,'Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
             if t % logSteps == 0:
                 Dloss = self.sess.run(self.Dloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})
                 Gloss = self.sess.run(self.Gloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})
-                print("Discriminator Loss:",(Dloss),"Generator Loss:",(Gloss))
+                print('At step: ',t,"Discriminator Loss:",(Dloss),"Generator Loss:",(Gloss))
             for i in range(dTrainSteps):
                 self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
             self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})

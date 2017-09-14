@@ -206,8 +206,8 @@ if __name__ == "__main__":
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,active, swap in args1:
         net.append(NiceLayer(dims,mlp,active,name,swap))
-    b = 5
-    m = 10
+    b = 8
+    m = 2
     dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],leaky_relu,"discriminator")
     sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
     '''

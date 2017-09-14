@@ -202,7 +202,7 @@ if __name__ == "__main__":
     mod = Ring2d("test")
     #mod = phi4(9,3,2,1,1)
     net = NiceNetwork()
-    args1 = [([[s,400],[400,s]],'generator/v1',tf.nn.relu,False),([[s,400],[400,s]],'generator/x1',tf.nn.relu,True),([[s,400],[400,s]],'generator/v2',tf.nn.relu,False)]
+    args1 = [([[s,400],[400,s]],'generator/v1',tf.identity,False),([[s,400],[400,s]],'generator/x1',tf.identity,True),([[s,400],[400,s]],'generator/v2',tf.identity,False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,active, swap in args1:
         net.append(NiceLayer(dims,mlp,active,name,swap))

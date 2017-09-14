@@ -36,10 +36,10 @@ m = 2
 dnet = mlp([[2*s,400],[400,400],[400,400],[400,1]],leaky_relu,"discriminator")
 sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 
-z,v = sampler.sample(8000,1000,True,True)
+z,v = sampler.sample(800,100,True,True)
 #print(z)
 print(z.shape)
-z = z[1000:,:]
+z = z[100:,:]
 #print(z)
 print(z.shape)
 acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))

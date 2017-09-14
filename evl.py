@@ -16,20 +16,20 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 def prior(bs):
-    return np.random.normal(0,1,[bs,3])
+    return np.random.normal(0,1,[bs,2])
 def priorPhi4(bs):
     return np.random.normal(0,1,[bs,9])
 
 if __name__ == "__main__":
-    energyFn = TGaussian()
-    energyFn = phi4(9,3,2,1,1)
-    hmc = HMCSampler(energyFn,priorPhi4)
-    mh = MHSampler(energyFn,priorPhi4)
+    energyFn = Ring2d()
+    #energyFn = phi4(9,3,2,1,1)
+    hmc = HMCSampler(energyFn,prior)
+    mh = MHSampler(energyFn,prior)
     print("HMC")
     z = hmc.sample(800,80)
     z_ = z[:,300:]
-    z_ = np.reshape(z_,[-1,3])
-    z1_,z2_,z3_ = z_[:,0],z_[:,1],z_[:,2]
+    z_ = np.reshape(z_,[-1,2])
+    z1_,z2_ = z_[:,0],z_[:,1]
     print(np.mean(z1_))
     print(np.std(z1_))
     print("autoCorrelationTime:")
@@ -40,8 +40,8 @@ if __name__ == "__main__":
     print("MH")
     z_ = mh.sample(800,80)
     z_ = z_[:,300:]
-    z_ = np.reshape(z_,[-1,3])
-    z1_,z2_,z3_ = z_[:,0],z_[:,1],z_[:,2]
+    z_ = np.reshape(z_,[-1,2])
+    z1_,z2_= z_[:,0],z_[:,1]
     print(np.mean(z1_))
     print(np.std(z1_))
     print("autoCorrelationTime:")

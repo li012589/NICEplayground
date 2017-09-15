@@ -122,11 +122,11 @@ class NICEMCSampler:
         self.Dloss = tf.reduce_mean(rD)-tf.reduce_mean(fD)+gradientHatD
         self.Gloss = tf.reduce_mean(fD)+tf.reduce_mean(0.5*tf.multiply(vConcated,vConcated))*eta
 
-        GVar = [var for var in tf.global_variables(learning_rate=5e-4, beta1=0.5, beta2=0.9) if 'generator' in var.name]
-        DVar = [var for var in tf.global_variables(learning_rate=5e-4, beta1=0.5, beta2=0.9) if 'discriminator' in var.name]
+        GVar = [var for var in tf.global_variables() if 'generator' in var.name]
+        DVar = [var for var in tf.global_variables(9) if 'discriminator' in var.name]
 
-        self.trainD = tf.train.AdamOptimizer().minimize(self.Dloss,var_list=DVar)
-        self.trainG = tf.train.AdamOptimizer().minimize(self.Gloss,var_list=GVar)
+        self.trainD = tf.train.AdamOptimizer(learning_rate=5e-4, beta1=0.5, beta2=0.9).minimize(self.Dloss,var_list=DVar)
+        self.trainG = tf.train.AdamOptimizer(learning_rate=5e-4, beta1=0.5, beta2=0.9).minimize(self.Gloss,var_list=GVar)
 
         self.sess.run(tf.global_variables_initializer())
 

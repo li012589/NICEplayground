@@ -117,13 +117,13 @@ class NICEMCSampler:
         hat = batchDate*epsilon + zConcated*(1-epsilon)
         hatD = self.discriminator(hat)
         gradientHatD = tf.gradients(hatD,hat)[0]
-        gradientHatD = tf.norm(gradientHatD)
+        gradientHatD = tf.norm(gradientHatD,axis=1)
         gradientHatD = tf.reduce_mean(tf.square(gradientHatD-1.0)*scale)
         self.Dloss = tf.reduce_mean(rD)-tf.reduce_mean(fD)+gradientHatD
         self.Gloss = tf.reduce_mean(fD)+tf.reduce_mean(0.5*tf.multiply(vConcated,vConcated))*eta
 
-        GVar = [var for var in tf.global_variables() if 'generator' in var.name]
-        DVar = [var for var in tf.global_variables() if 'discriminator' in var.name]
+        GVar = [var for var in tf.global_variables(learning_rate=5e-4, beta1=0.5, beta2=0.9) if 'generator' in var.name]
+        DVar = [var for var in tf.global_variables(learning_rate=5e-4, beta1=0.5, beta2=0.9) if 'discriminator' in var.name]
 
         self.trainD = tf.train.AdamOptimizer().minimize(self.Dloss,var_list=DVar)
         self.trainG = tf.train.AdamOptimizer().minimize(self.Gloss,var_list=GVar)
@@ -202,7 +202,7 @@ if __name__ == "__main__":
     mod = Ring2d("test")
     #mod = phi4(9,3,2,1,1)
     net = NiceNetwork()
-    args1 = [([[s,400],[400,s]],'generator/v1',tf.identity,False),([[s,400],[400,s]],'generator/x1',tf.identity,True),([[s,400],[400,s]],'generator/v2',tf.identity,False)]
+    args1 = [([[s,400],[400,s]],'generator/v1',tf.nn.relu,False),([[s,400],[400,s]],'generator/x1',tf.nn.relu,True),([[s,400],[400,s]],'generator/v2',tf.nn.relu,False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,active, swap in args1:
         net.append(NiceLayer(dims,mlp,active,name,swap))

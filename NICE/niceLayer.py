@@ -49,7 +49,7 @@ class NiceNetwork:
             inputs = layer.forward(inputs)
         return inputs
     def backward(self,inputs):
-        for layer in self.layers:
+        for layer in reversed(self.layers):
             inputs = layer.backward(inputs)
         return inputs
 
@@ -115,3 +115,9 @@ if __name__ == "__main__":
     print(ret2_r)
     assert (np.allclose(inputs,ret2_r)), "Input doesn't match backward"
     assert (np.allclose(forward,ret2r)), "First forward doesn't math second forward, the parameter in inner layer may not be same'"
+
+    print("compute gradients")
+    g = sess.run(tf.gradients(ret,inputs_))
+    print(g)
+    print("det:")
+    print(np.linalg.det(g))

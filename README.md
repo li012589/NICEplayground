@@ -18,7 +18,7 @@ After training, run `testNicemc.py` to sample using NICE network, in the file ch
 
 ## Result
 
-For now, after 100'000 iterations of training, sampling 800 samples of Ring2D model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yielded:
+For now, after 100'000 iterations of training of NICE-MC, sampling 800 samples of Ring2D model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
 
 | Algor.  | mean        | std     | accept. | autocor. t    |
 | :------ | ----------- | ------- | ------- | ------------- |

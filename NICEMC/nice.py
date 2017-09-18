@@ -10,14 +10,57 @@ from utils.MetropolisHastingsAccept import metropolisHastingsAccept as metropoli
 from utils.hamiltonian import hamiltonian
 #from NICEME.discriminator import dense
 from utils.expLogger import expLogger
+from utils.parameterInit import weightVariable,biasVariable
 
 def dense(inputs, num_outputs, activation_fn=tf.identity, normalizer_fn=None, normalizer_params=None):
     return tcl.fully_connected(inputs, num_outputs, activation_fn=activation_fn,
                                normalizer_fn=normalizer_fn, normalizer_params=normalizer_params)
+class mlpnet:
+    def __init__(self,dims,active,name):
+        self.name = name+'mlpnet'
+        self.dims = [dim[1] for dim in dims][:-1]
+        self.outdim = dims[0][0]
+        #x = tf.zeros([1,dims[0][0]])
+        #_ = self.cal(x,None)
+        self.W=[]
+        self.B=[]
+        self.active = active
+        with tf.variable_scope(name):
+            for i,dim in enumerate(dims):
+                self.W.append(weightVariable(str(i)+"ttwfc",dim))
+                self.B.append(biasVariable(str(i)+"ttbfc",dim[1]))
+    def cal(self,x,reuse=True):
+        with tf.variable_scope(self.name, reuse=reuse):
+            '''
+            for dim in self.dims:
+                x = dense(x, dim, activation_fn=tf.nn.relu)
+            x = dense(x, self.outdim)
+            '''
+            for i in range(len(self.W)):
+                x = tf.matmul(x,self.W[i])+self.B[i]
+                if i != len(self.W)-1:
+                    x = self.active(x)
+            return x
+class mlp:
+    def __init__(self,dims,active,name="MLP"):
+        self.W = []
+        self.B = []
+        self.active = active
+        with tf.variable_scope(name):
+            for i,dim in enumerate(dims):
+                self.W.append(weightVariable(str(i)+"wFC",dim))
+                self.B.append(biasVariable(str(i)+"bFC",dim[-1]))
 
+    def cal(self,fc):
+        for i,w in enumerate(self.W):
+            if i != len(self.W)-1:
+                fc = self.active(tf.matmul(fc,w)+self.B[i])
+            else:
+                fc = (tf.matmul(fc,w)+self.B[i])
+        return fc
 
 class NiceLayer:
-    def __init__(self, dims, network,active,name='nice', swap=False):
+    def __init__(self, dims, _,active,name='nice', swap=False):
         """
         NICE Layer that takes in [x, v] as input and updates one of them.
         Note that for NICE, the Jacobian is always 1; but we keep it for
@@ -26,122 +69,42 @@ class NiceLayer:
         :param name: TensorFlow variable name scope for variable reuse.
         :param swap: Update x if True, or update v if False.
         """
-        self.dims, self.reuse, self.swap = [dim[1] for dim in dims][:-1], False, swap
-        self.name = 'generator/' + name
-
-    def forward(self, inputs):
+        self.swap = swap
+        self.name = name
+        self.network = mlp(dims,active,name+"i")
+    def forward(self,inputs):
         x, v = inputs
-        x_dim, v_dim = x.get_shape().as_list()[-1], v.get_shape().as_list()[-1]
         if self.swap:
-            t = self.add(v, x_dim, reuse=self.reuse)
+            t = self.network.cal(v)
             x = x + t
         else:
-            t = self.add(x, v_dim, reuse=self.reuse)
+            t = self.network.cal(x)
             v = v + t
         return [x, v]
-
-    def backward(self, inputs):
+    def backward(self,inputs):
         x, v, = inputs
-        x_dim, v_dim = x.get_shape().as_list()[-1], v.get_shape().as_list()[-1]
         if self.swap:
-            t = self.add(v, x_dim, reuse=True)
+            t = self.network.cal(v)
             x = x - t
         else:
-            t = self.add(x, v_dim, reuse=True)
+            t = self.network.cal(x)
             v = v - t
         return [x, v]
-
-    def add(self, x, dx, reuse=False):
-        with tf.variable_scope(self.name, reuse=reuse):
-            for dim in self.dims:
-                x = dense(x, dim, activation_fn=tf.nn.relu)
-            x = dense(x, dx)
-            return x
-
-    def create_variables(self, x_dim, v_dim):
-        assert not self.reuse
-        x = tf.zeros([1, x_dim])
-        v = tf.zeros([1, v_dim])
-        _ = self.forward([x, v])
-        self.reuse = True
 
 
 class NiceNetwork(object):
     def __init__(self, x_dim, v_dim):
         self.layers = []
-        self.x_dim, self.v_dim = x_dim, v_dim
-
     def append(self, layer):
-        layer.create_variables(self.x_dim, self.v_dim)
         self.layers.append(layer)
-
     def forward(self, inputs):
-        #x = inputs
         for layer in self.layers:
             inputs= layer.forward(inputs)
         return inputs
-
     def backward(self, inputs):
-        #x = inputs
         for layer in reversed(self.layers):
             inputs= layer.backward(inputs)
         return inputs
-
-    def __call__(self, x, is_backward):
-        return tf.cond(
-            is_backward,
-            lambda: self.backward(x),
-            lambda: self.forward(x)
-        )
-
-class TrainingOperator(object):
-    def __init__(self, network):
-        self.network = network
-
-    def __call__(self, inputs, steps):
-        def fn(zv, x):
-            """
-            Transition for training, without Metropolis-Hastings.
-            `z` is the input state.
-            `v` is created as a dummy variable to allow output of v_, for training p(v).
-            :param x: variable only for specifying the number of steps
-            :return: next state `z_`, and the corresponding auxiliary variable `v_`.
-            """
-            z, v = zv
-            v = tf.random_normal(shape=tf.stack([tf.shape(z)[0], self.network.v_dim]))
-            z_, v_ = self.network.forward([z, v])
-            return z_, v_
-
-        elems = tf.zeros([steps])
-        return tf.scan(fn, elems, inputs, back_prop=True)
-
-
-class InferenceOperator(object):
-    def __init__(self, network, energy_fn):
-        self.network = network
-        self.energy_fn = energy_fn
-        self.log = expLogger({})
-
-    def __call__(self, inputs, steps):
-        def fn(zv, x):
-            """
-            Transition with Metropolis-Hastings.
-            `z` is the input state.
-            `v` is created as a dummy variable to allow output of v_, for debugging purposes.
-            :param x: variable only for specifying the number of steps
-            :return: next state `z_`, and the corresponding auxiliary variable `v_`.
-            """
-            z, v = zv
-            v = tf.random_normal(shape=tf.stack([tf.shape(z)[0], self.network.v_dim]))
-            z_, v_ = self.network([z, v], is_backward=(tf.random_uniform([]) < 0.5))
-            ep = hamiltonian(z, v, self.energy_fn)
-            en = hamiltonian(z_, v_, self.energy_fn)
-            accept = metropolis_hastings_accept(ep, en,self.log)
-            z_ = tf.where(accept, z_, z)
-            return z_, v_
-
-        elems = tf.zeros([steps])
-        return tf.scan(fn, elems, inputs, back_prop=False)
 
 if __name__ == "__main__":
     import numpy as np

@@ -136,6 +136,7 @@ class NICEMCSampler:
             checkpoint = tf.train.get_checkpoint_state(self.savePath)
             if checkpoint and checkpoint.model_checkpoint_path:
                 saver.restore(self.sess, checkpoint.model_checkpoint_path)
+                print("Successfully loaded:", checkpoint.model_checkpoint_path)
             elif echo:
                 print("Loading failed, starting sampler from random parameter")
         elif echo:
@@ -148,6 +149,7 @@ class NICEMCSampler:
         if ifload:
             if checkpoint and checkpoint.model_checkpoint_path:
                 saver.restore(self.sess,checkpoint.model_checkpoint_path)
+                print("Successfully loaded:", checkpoint.model_checkpoint_path)
             else:
                 print("Loading failed, staring training from random parameter")
         else:

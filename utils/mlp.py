@@ -19,7 +19,7 @@ class mlp:
     def __call__(self,fc):
         for i,w in enumerate(self.W):
             if i != len(self.W)-1:
-                fc = self.active(tf.matmul(fc,w))+self.B[i]
+                fc = self.active(tf.matmul(fc,w)+self.B[i])
             else:
                 fc = (tf.matmul(fc,w)+self.B[i])
         return fc

@@ -5,12 +5,13 @@ if __name__ == "__main__":
 
 import tensorflow as tf
 import numpy as np
-from NICE.niceLayer import NiceLayer,NiceNetwork
+#from NICE.niceLayer import NiceLayer,NiceNetwork
 from utils.MetropolisHastingsAccept import metropolisHastingsAccept
 from utils.hamiltonian import hamiltonian
 from utils.expLogger import expLogger
 from utils.autoCorrelation import autoCorrelationTime
 from utils.acceptRate import acceptance_rate
+from nice import NiceLayer,NiceNetwork
 #from utils.buff import Buffer
 
 def leaky_relu(x, alpha=0.2):
@@ -203,7 +204,7 @@ if __name__ == "__main__":
     #mod = TGaussian("test")
     mod = Ring2d("test")
     #mod = phi4(9,3,2,1,1)
-    net = NiceNetwork()
+    net = NiceNetwork(s,s)
     args1 = [([[s,400],[400,s]],'generator/v1',tf.nn.relu,False),([[s,400],[400,s]],'generator/x1',tf.nn.relu,True),([[s,400],[400,s]],'generator/v2',tf.nn.relu,False)]
     #args = [([2],'x1',True),([2],'v1',False),([2],'x2',True)]
     for dims, name ,active, swap in args1:

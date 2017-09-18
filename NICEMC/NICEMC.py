@@ -5,13 +5,13 @@ if __name__ == "__main__":
 
 import tensorflow as tf
 import numpy as np
-#from NICE.niceLayer import NiceLayer,NiceNetwork
+from NICE.niceLayer import NiceLayer,NiceNetwork
 from utils.MetropolisHastingsAccept import metropolisHastingsAccept
 from utils.hamiltonian import hamiltonian
 from utils.expLogger import expLogger
 from utils.autoCorrelation import autoCorrelationTime
 from utils.acceptRate import acceptance_rate
-from nice import NiceLayer,NiceNetwork
+#from nice import NiceLayer,NiceNetwork
 #from utils.buff import Buffer
 
 def leaky_relu(x, alpha=0.2):

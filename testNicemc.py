@@ -45,7 +45,7 @@ z = z[300:,:]
 print(z.shape)
 autocorrelation = autoCorrelationTime(z,7)
 acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
-print(acceptRate)
+#print(acceptRate)
 print("autoCorrelation: ",autocorrelation,"acceptRate: ",acceptRate)
 z_ = np.reshape(z,[-1,2])
 z0,z1 = z_[:,0],z_[:,1]

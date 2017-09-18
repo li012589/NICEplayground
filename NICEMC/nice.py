@@ -16,25 +16,8 @@ def dense(inputs, num_outputs, activation_fn=tf.identity, normalizer_fn=None, no
                                normalizer_fn=normalizer_fn, normalizer_params=normalizer_params)
 
 
-class Layer(object):
-    """
-    Base method for implementing flow based models.
-    `forward` and `backward` methods return two values:
-     - the output of the layer
-     - the resulting change of log-determinant of the Jacobian.
-    """
-    def __init__(self):
-        pass
-
-    def forward(self, inputs):
-        raise NotImplementedError(str(type(self)))
-
-    def backward(self, inputs):
-        raise NotImplementedError(str(type(self)))
-
-
-class NiceLayer(Layer):
-    def __init__(self, dims, name='nice', swap=False):
+class NiceLayer:
+    def __init__(self, dims, network,active,name='nice', swap=False):
         """
         NICE Layer that takes in [x, v] as input and updates one of them.
         Note that for NICE, the Jacobian is always 1; but we keep it for
@@ -43,8 +26,7 @@ class NiceLayer(Layer):
         :param name: TensorFlow variable name scope for variable reuse.
         :param swap: Update x if True, or update v if False.
         """
-        super(NiceLayer, self).__init__()
-        self.dims, self.reuse, self.swap = dims, False, swap
+        self.dims, self.reuse, self.swap = [dim[1] for dim in dims][:-1], False, swap
         self.name = 'generator/' + name
 
     def forward(self, inputs):

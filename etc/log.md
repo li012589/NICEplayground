@@ -27,3 +27,26 @@
 
 1. Train it ti see if it can perferm as well as original.
 2. Benchmark
+
+## 2017. 9. 19 Tue.
+
+### Done
+
+
+
+1. Train NICEMC/NICEMC.py for 200'000 iterations, acceptance ratio can be up to 73%, Train original NICE-MC the acceptance ratio can be up to about 75%. 
+
+2. After training, run testNicemc.py, the result is:
+
+   autoCorrelation:  -0.111961132942 acceptRate:  0.70292
+   mean: -0.0127335
+   std: 1.4507
+   mean: -0.0150352
+   std: 1.46035 
+
+3. Debug: save parameter at end of all iterations.
+
+### TODO
+
+1. separate test to a single file as training script.
+2. add matplotlib to plot training

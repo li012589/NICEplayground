@@ -184,13 +184,13 @@ class NICEMCSampler:
                     summary = self.sess.run(tf.summary.merge_all(),feed_dict={tfDloss:Dloss,tfGloss:Gloss})
                     writer.add_summary(summary,t)
                     writer.flush()
-                saver.save(self.sess, self.savePath+'/nice', global_step = t)
+                saver.save(self.sess, self.savePath+'/nice' + self.energyFn.name, global_step = t)
                 print("Net parameter saved")
         if ifSummary:
             summary = self.sess.run(tf.summary.merge_all(),feed_dict={tfDloss:Dloss,tfGloss:Gloss})
             writer.add_summary(summary,t)
             writer.flush()
-        saver.save(self.sess, self.savePath+'/nice', global_step = t)
+        saver.save(self.sess, self.savePath+'/nice' + self.energyFn.name, global_step = t)
         print("Net parameter saved")
 
 if __name__ == "__main__":

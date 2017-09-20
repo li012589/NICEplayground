@@ -45,4 +45,5 @@ dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
 sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 
 '''Start training'''
+print("Training NICE for "+sampler.energyFn.name)
 sampler.train(500,100000,5000,32,1000,100,32,5000,1000,5,32,1000,ifsummary,ifload)

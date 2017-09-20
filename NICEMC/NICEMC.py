@@ -1,8 +1,8 @@
+
+import os
 if __name__ == "__main__":
     import sys
-    import os
     sys.path.append(os.getcwd())
-
 import tensorflow as tf
 import numpy as np
 from NICE.niceLayer import NiceLayer,NiceNetwork

@@ -38,7 +38,7 @@ z = hmc.sample(800,100)
 z_o = z[300:,:]
 z_ = np.reshape(z_o,[-1,2])
 z1_,z2_ = z_[:,0],z_[:,1]
-print("mean: ".np.mean(z1_))
+print("mean: ",np.mean(z1_))
 print("std: ",np.std(z1_))
 autoCorrelation =  autoCorrelationTime(z_,7)
 acceptRate = acceptance_rate(z_o)

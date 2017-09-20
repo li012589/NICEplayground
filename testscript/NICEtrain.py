@@ -32,6 +32,8 @@ mod = Ring2d()
 '''Define the NICE-MC sampler'''
 m = 2
 b = 8
+ifload = False
+ifsummary = True
 net = NiceNetwork()
 niceStructure = [([[zSize,400],[400,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,400],[400,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,400],[400,zSize]],'generator/v2',tf.nn.relu,False)]
 discriminatorStructure = [[2*zSize,400],[400,400],[400,400],[400,1]]
@@ -42,4 +44,4 @@ dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
 sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 
 '''Start training'''
-sampler.train(500,100000,5000,32,1000,100,32,5000,1000,5,32,1000,True,False)
+sampler.train(500,100000,5000,32,1000,100,32,5000,1000,5,32,1000,ifsummary,ifload)

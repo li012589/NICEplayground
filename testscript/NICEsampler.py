@@ -43,8 +43,9 @@ TimeStep = 800
 BatchSize = 100
 BurnIn = 300
 bins = 7
+ifload = True
 
-z,v = sampler.sample(TimeStep,BatchSize,True,True)
+z,v = sampler.sample(TimeStep,BatchSize,ifload,True)
 z = z[BurnIn:,:]
 autocorrelation = autoCorrelationTime(z,bins)
 acceptRate = acceptance_rate(z)

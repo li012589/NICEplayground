@@ -33,24 +33,29 @@ hmc = HMCSampler(energyFn,prior)
 mh = MHSampler(energyFn,prior)
 
 '''Start sampling'''
+TimeStep = 800
+BatchSize = 100
+BurnIn = 300
+bins = 7
+
 print("HMC")
-z = hmc.sample(800,100)
-z_o = z[300:,:]
+z = hmc.sample(TimeStep,BatchSize)
+z_o = z[BurnIn:,:]
 z_ = np.reshape(z_o,[-1,2])
 z1_,z2_ = z_[:,0],z_[:,1]
 print("mean: ",np.mean(z1_))
 print("std: ",np.std(z1_))
-autoCorrelation =  autoCorrelationTime(z_,7)
+autoCorrelation =  autoCorrelationTime(z_,bins)
 acceptRate = acceptance_rate(z_o)
 print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
 
 print("MH")
-z_ = mh.sample(800,100)
-z_o = z_[300:,:]
+z_ = mh.sample(TimeStep,BatchSize)
+z_o = z_[BurnIn:,:]
 z_ = np.reshape(z_o,[-1,2])
 z1_,z2_= z_[:,0],z_[:,1]
 print("mean: ",np.mean(z1_))
 print("std: ",np.std(z1_))
-autoCorrelation =  autoCorrelationTime(z_,7)
+autoCorrelation =  autoCorrelationTime(z_,bins)
 acceptRate = acceptance_rate(z_o)
 print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))

@@ -64,7 +64,7 @@ class NiceNetworkOperator:
         return tf.scan(fn,elems,inputs,back_prop=flag)
 
 class NICEMCSampler:
-    def __init__(self,energyFn,prior,network,discriminator,b,m,savePath,summaryPath,scale=10.0,eta=1.0):
+    def __init__(self,energyFn,prior,network,discriminator,b,m,savePath,summaryPath,scale=10.0,eta=1.0,learningRate = 5e-4, beta1 = 0.5, beta2 = 0.9):
         self.energyFn = energyFn
         self.prior = prior
         self.Operator = NiceNetworkOperator(network,energyFn)
@@ -77,6 +77,9 @@ class NICEMCSampler:
         self.savePath = savePath
         self.summaryPath = summaryPath
         self.sess = tf.InteractiveSession()
+        self.learningRate = learningRate
+        self.beta1 = beta1
+        self.beta2 = beta2
 
         self.z = tf.placeholder(tf.float32,[None,self.zDim])
         self.reallyData = tf.placeholder(tf.float32,[None,self.zDim])
@@ -126,8 +129,8 @@ class NICEMCSampler:
         GVar = [var for var in tf.global_variables() if 'generator' in var.name]
         DVar = [var for var in tf.global_variables() if 'discriminator' in var.name]
 
-        self.trainD = tf.train.AdamOptimizer(learning_rate=5e-4, beta1=0.5, beta2=0.9).minimize(self.Dloss,var_list=DVar)
-        self.trainG = tf.train.AdamOptimizer(learning_rate=5e-4, beta1=0.5, beta2=0.9).minimize(self.Gloss,var_list=GVar)
+        self.trainD = tf.train.AdamOptimizer(learning_rate=self.learningRate, beta1=self.beta1, beta2=self.beta2).minimize(self.Dloss,var_list=DVar)
+        self.trainG = tf.train.AdamOptimizer(learning_rate=self.learningRate, beta1=self.beta1, beta2=self.beta2).minimize(self.Gloss,var_list=GVar)
 
         self.sess.run(tf.global_variables_initializer())
 
@@ -179,19 +182,13 @@ class NICEMCSampler:
             for i in range(dTrainSteps):
                 self.sess.run(self.trainD,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
             self.sess.run(self.trainG,feed_dict={self.z:self.prior(trainBatchSize),self.reallyData:self.buff(trainBatchSize),self.batchDate:self.buff(4*trainBatchSize)})
-            if t % saveSteps == 0:
+            if t % saveSteps == 0 or t == totalSteps:
                 if ifSummary:
                     summary = self.sess.run(tf.summary.merge_all(),feed_dict={tfDloss:Dloss,tfGloss:Gloss})
                     writer.add_summary(summary,t)
                     writer.flush()
-                saver.save(self.sess, self.savePath+'/nice' + self.energyFn.name, global_step = t)
+                saver.save(self.sess, self.savePath+'/nice_' + self.energyFn.name, global_step = t)
                 print("Net parameter saved")
-        if ifSummary:
-            summary = self.sess.run(tf.summary.merge_all(),feed_dict={tfDloss:Dloss,tfGloss:Gloss})
-            writer.add_summary(summary,t)
-            writer.flush()
-        saver.save(self.sess, self.savePath+'/nice' + self.energyFn.name, global_step = t)
-        print("Net parameter saved")
 
 if __name__ == "__main__":
     '''
@@ -208,7 +205,7 @@ if __name__ == "__main__":
         return np.random.normal(0,1,[batchSize,s])
 
     #mod = TGaussian("test")
-    mod = Ring2d("test")
+    mod = Ring2d()
     #mod = phi4(9,3,2,1,1)
     net = NiceNetwork()
     args1 = [([[s,400],[400,s]],'generator/v1',tf.nn.relu,False),([[s,400],[400,s]],'generator/x1',tf.nn.relu,True),([[s,400],[400,s]],'generator/v2',tf.nn.relu,False)]

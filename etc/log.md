@@ -32,8 +32,6 @@
 
 ### Done
 
-
-
 1. Train NICEMC/NICEMC.py for 200'000 iterations, acceptance ratio can be up to 73%, Train original NICE-MC the acceptance ratio can be up to about 75%. 
 
 2. After training, run testNicemc.py, the result is:

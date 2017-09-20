@@ -170,7 +170,7 @@ class NICEMCSampler:
                 z,v = self.sample(evlSteps+evlBurnIn,evlBatchSize,False,False)
                 z = z[evlBurnIn:,:]
                 autoCorrelation = autoCorrelationTime(z,7)
-                acceptRate = acceptance_rate(np.transpose(z,[1,0,2]))
+                acceptRate = acceptance_rate(z)
                 print('At step: ',t,'Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
             if t % logSteps == 0:
                 Dloss = self.sess.run(self.Dloss,feed_dict={self.z:self.prior(evlBatchSize),self.reallyData:self.buff(evlBatchSize),self.batchDate:self.buff(4*evlBatchSize)})

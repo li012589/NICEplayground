@@ -10,11 +10,13 @@ NICE-MC seems running fine, acceptance ratio can be as high as original at Ring2
 
 ## How to 
 
-Run `evl.py` to seem the result of HMC and MH of Ring2D model, in the file change `zDim` to corresponding  length(easy way to do it:  `zDim = energyFn.z.get_shape().as_list()[1] ` ). And let `energyFn` equals the model to evaluate. In default, the model is Ring2D and corresponding `zDim` is 2. And the result should be about 0 for mean and 1.456 for std.
+examples can be found in testscript folder.
 
-Run `NICEMC\NICEMC.py` to train NICE network, it will not load parameter from previous saving and run for 100'000 iterations by default, and it will save every 1'000 iterations. 
+Run `testscript/Normalsampler.py` to seem the result of HMC and MH of Ring2D model, in the file change `zSize` to corresponding  length(easy way to do it:  `zSize = energyFn.z.get_shape().as_list()[1] ` ). And let `energyFn` equals the model to evaluate. In default, the model is Ring2D and corresponding `zSize` is 2. And the result should be about 0 for mean and 1.456 for std.
 
-After training, run `testNicemc.py` to sample using NICE network, in the file change `zDim` to corresponding  dimensions. And let `energyFn` equals the model to evaluate. In default, the model is Ring2D and corresponding `zDim` is 2. 
+Run `testscript/NICEtrain.py` to train NICE network, it will not load parameter from previous saving and run for 100'000 iterations by default, and it will save every 1'000 iterations. 
+
+After training, run `testscript/NICEsampler.py` to sample using NICE network, in the file change `zSize` to corresponding  dimensions. And let `energyFn` equals the model to evaluate. In default, the model is Ring2D and corresponding `zSize` is 2. 
 
 ## Result
 

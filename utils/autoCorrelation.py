@@ -15,5 +15,5 @@ def binning_analysis(samples,bins):
 def auto_time(errors):
   return  .5*(errors[-1]**2/errors[0]**2 - 1.)
 
-def autoCorrelationTime(samples,bins):
+def autoCorrelationTime(samples,bins=7):
     return auto_time(binning_analysis(samples,bins))

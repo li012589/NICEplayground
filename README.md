@@ -20,11 +20,11 @@ After training, run `testNicemc.py` to sample using NICE network, in the file ch
 
 For now, after 200'000 iterations of training of NICE-MC, sampling 800 samples of Ring2D model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
 
-| Algor.  | mean        | std     | accept. | autocor. t      |
-| :------ | ----------- | ------- | ------- | --------------- |
-| MH      | 0.0786284   | 1.43155 | NA      | 19.2251491761   |
-| HMC     | -0.00902451 | 1.4578  | NA      | 5.53441307631   |
-| NICE-MC | -0.0028535  | 1.454   | 0.69926 | -0.115518120039 |
+| Algor.  | mean        | std     | accept. | autocor. t       |
+| :------ | ----------- | ------- | ------- | ---------------- |
+| MH      | 0.0786284   | 1.43155 | 1.0 (?) | 19.2251491761    |
+| HMC     | -0.00902451 | 1.4578  | 1.0 (?) | 5.53441307631    |
+| NICE-MC | -0.0028535  | 1.454   | 0.69926 | -0.115518120 (?) |
 
 
 

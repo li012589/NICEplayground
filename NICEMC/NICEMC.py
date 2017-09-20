@@ -74,7 +74,12 @@ class NICEMCSampler:
         self.m = tf.to_int32(tf.reshape(tf.multinomial(tf.ones([1, m]), 1), [])) + 1
         self.zDim = energyFn.z.get_shape().as_list()[1]
         self.vDim = self.zDim
-        self.savePath = savePath
+        self.savePath = savePath+"/"+self.energyFn.name
+        try:
+            os.makedirs(self.savepath)
+        except OSError:
+            print("Cannot create separate folder, using savePath")
+            self.savePath = savePath
         self.summaryPath = summaryPath
         self.sess = tf.InteractiveSession()
         self.learningRate = learningRate

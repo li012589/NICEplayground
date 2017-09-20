@@ -6,7 +6,7 @@ This project is a re-write of original [NICEMC program](https://github.com/ermon
 
 HMC and MH works fine.
 
-NICE-MC may have some problems, but still yields right result for at least Ring2D model(with mean ~0, std ~1.456). And training does improve it's performance(rise of acceptance ratio and down of autocorrelation time) but acceptance ratio seemed stuck at 48% somehow(with original program at ~60%).
+NICE-MC ~~may have some problems, but still yields right result for at least Ring2D model(with mean ~0, std ~1.456). And training does improve it's performance(rise of acceptance ratio and down of autocorrelation time) but acceptance ratio seemed stuck at 48% somehow(with original program at ~60%).~~ now seems running fine, acceptance ratio can be as high as original at Ring2D model.
 
 ## How to 
 

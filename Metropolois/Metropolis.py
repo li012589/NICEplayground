@@ -28,7 +28,7 @@ class MHSampler():
         self.sess.run(tf.global_variables_initializer())
     def sample(self,steps,batchSize):
         z = self.sess.run(self.z_,feed_dict={self.steps:steps,self.z:self.prior(batchSize)})
-        z = np.transpose(z,[1,0,2])
+        #z = np.transpose(z,[1,0,2])
         return z
 def main():
     from model.ring2d import Ring2d

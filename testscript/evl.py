@@ -28,8 +28,8 @@ if __name__ == "__main__":
     hmc = HMCSampler(energyFn,prior)
     mh = MHSampler(energyFn,prior)
     print("HMC")
-    z = hmc.sample(800,80)
-    z_o = z[:,300:]
+    z = hmc.sample(800,100)
+    z_o = z[300:,:]
     z_ = np.reshape(z_o,[-1,2])
     z1_,z2_ = z_[:,0],z_[:,1]
     print(np.mean(z1_))
@@ -38,12 +38,13 @@ if __name__ == "__main__":
     print(autoCorrelationTime(z_,7))
     #print(autoCorrelationTime(z1_,7))
     print("acceptance:")
-    print(acceptance_rate(np.transpose(z_o,[1,0,2])))
+    #print(z_o)
+    print(acceptance_rate(z_o))#np.transpose(z_o,[1,0,2])))
     #print(autoCorrelationTime(z2_,7))
     #print(autoCorrelationTime(z3_,7))
     print("MH")
-    z_ = mh.sample(800,80)
-    z_o = z_[:,300:]
+    z_ = mh.sample(800,100)
+    z_o = z_[300:,:]
     z_ = np.reshape(z_o,[-1,2])
     z1_,z2_= z_[:,0],z_[:,1]
     print(np.mean(z1_))
@@ -52,6 +53,6 @@ if __name__ == "__main__":
     print(autoCorrelationTime(z_,7))
     #print(autoCorrelationTime(z1_,7))
     print("acceptance:")
-    print(acceptance_rate(np.transpose(z_o,[1,0,2])))
+    print(acceptance_rate(z_o))#np.transpose(z_o,[1,0,2])))
     #print(autoCorrelationTime(z2_,7))
     #print(autoCorrelationTime(z3_,7))

@@ -102,7 +102,7 @@ class HMCSampler:
         self.sess.run(tf.global_variables_initializer())
     def sample(self,steps,batchSize):
         z,stepSize,acceptRate = self.sess.run([self.z_,self.stepSize_,self.acceptRate_],feed_dict={self.steps:steps,self.z:self.prior(batchSize)})
-        z = np.transpose(z,[1,0,2])
+        #z = np.transpose(z,[1,0,2])
         return z
 
 def main():

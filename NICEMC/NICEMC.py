@@ -76,7 +76,7 @@ class NICEMCSampler:
         self.vDim = self.zDim
         self.savePath = savePath+"/"+self.energyFn.name
         try:
-            os.makedirs(self.savepath)
+            os.makedirs(self.savePath)
         except OSError:
             print("Cannot create separate folder, using savePath")
             self.savePath = savePath

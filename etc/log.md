@@ -48,3 +48,12 @@
 
 1. separate test to a single file as training script.
 2. add matplotlib to plot training
+
+## 2017. 9. 20 Thu. 
+
+### Done
+
+1. Test phi4 model, original yield maximum acceptance ratio of ~30% for training about 100'000 iterations. 
+2. Clear code for easy read. Move all test script into test script folder.
+3. Test phi4 model, my implement yield maximum acceptance ratio of ~12% for 10'000 iterations.
+

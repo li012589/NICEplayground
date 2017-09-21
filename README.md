@@ -10,7 +10,7 @@ NICE-MC seems running fine, acceptance ratio can be as high as original at Ring2
 
 ## How to 
 
-examples can be found in testscript folder.
+examples can be found in *testscript* folder.
 
 Run `testscript/Normalsampler.py` to seem the result of HMC and MH of Ring2D model, in the file change `zSize` to corresponding  length(easy way to do it:  `zSize = energyFn.z.get_shape().as_list()[1] ` ). And let `energyFn` equals the model to evaluate. In default, the model is Ring2D and corresponding `zSize` is 2. And the result should be about 0 for mean and 1.456 for std.
 
@@ -18,9 +18,31 @@ Run `testscript/NICEtrain.py` to train NICE network, it will not load parameter 
 
 After training, run `testscript/NICEsampler.py` to sample using NICE network, in the file change `zSize` to corresponding  dimensions. And let `energyFn` equals the model to evaluate. In default, the model is Ring2D and corresponding `zSize` is 2. 
 
+**Remember to run all script in root directory of project**
+
+## GAN computational graph
+
+
+
+## NICE network 
+
+
+
+## Folder Structure
+
+
+
+## Saving Structure
+
+### demo
+
+
+
 ## Result
 
-For now, after 200'000 iterations of training of NICE-MC, sampling 800 samples of Ring2D model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
+### Ring2D 
+
+After 200'000 iterations of training of NICE-MC, sampling 800 samples of Ring2D model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
 
 | Algor.       | mean       | std     | accept. | autocor. t       |
 | :----------- | ---------- | ------- | ------- | ---------------- |
@@ -29,5 +51,13 @@ For now, after 200'000 iterations of training of NICE-MC, sampling 800 samples o
 | NICE-MC      | -0.0028535 | 1.454   | 0.69926 | -0.115518120 (?) |
 | Ground truth | 0          | 1.456   | NA      | NA               |
 
+### Phi4
 
+After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
+
+| Algor.  | mean      | std     | accept. | autocor. t         |
+| :------ | --------- | ------- | ------- | ------------------ |
+| MH      | 0.0293503 | 1.99719 | 0.00578 | -0.293327202745(?) |
+| HMC     | -0.675433 | 2.00156 | 0.87384 | -0.464749906862(?) |
+| NICE-MC | 0.0408737 | 2.11057 | 0.33308 | 0.170936615726     |
 

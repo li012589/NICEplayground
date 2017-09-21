@@ -55,7 +55,7 @@ z = z[BurnIn:,:]
 autocorrelation = autoCorrelationTime(z,bins)
 acceptRate = acceptance_rate(z)
 print("autoCorrelation: ",autocorrelation,"acceptRate: ",acceptRate)
-z_ = np.reshape(z,[-1,2])
+z_ = np.reshape(z,[-1,zSize])
 z0,z1 = z_[:,0],z_[:,1]
 print(np.mean(z0))
 print(np.std(z0))

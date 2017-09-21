@@ -53,6 +53,8 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Ring2D 
 
 ### Phi4
 
+Evaluating $3\times3, \kappa=1, \beta = 1$ Ph4. 
+
 After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
 
 | Algor.  | mean      | std     | accept. | autocor. t         |
@@ -60,4 +62,3 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 | MH      | 0.0293503 | 1.99719 | 0.00578 | -0.293327202745(?) |
 | HMC     | -0.675433 | 2.00156 | 0.87384 | -0.464749906862(?) |
 | NICE-MC | 0.0408737 | 2.11057 | 0.33308 | 0.170936615726     |
-

@@ -58,5 +58,5 @@ z = z[BurnIn:,:]
 autocorrelation = autoCorrelationTime(z,bins)
 acceptRate = acceptance_rate(z)
 print("autoCorrelation: ",autocorrelation,"acceptRate: ",acceptRate)
-print(np.mean(z))
-print(np.std(z))
+print("mean: ",np.mean(z))
+print("std: ".np.std(z))

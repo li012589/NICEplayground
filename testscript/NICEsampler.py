@@ -29,13 +29,18 @@ def prior(batchSize):
 #mod = TGaussian()
 mod = Ring2d()
 #mod = phi4(9,3,2,1,1)
-net = NiceNetwork()
-args1 = [([[zSize,400],[400,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,400],[400,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,400],[400,zSize]],'generator/v2',tf.nn.relu,False)]
-for dims, name ,active, swap in args1:
-    net.append(NiceLayer(dims,mlp,active,name,swap))
-b = 8
+
 m = 2
-dnet = mlp([[2*zSize,400],[400,400],[400,400],[400,1]],leaky_relu,"discriminator")
+b = 8
+ifload = False
+ifsummary = True
+net = NiceNetwork()
+niceStructure = [([[zSize,400],[400,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,400],[400,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,400],[400,zSize]],'generator/v2',tf.nn.relu,False)]
+discriminatorStructure = [[2*zSize,400],[400,400],[400,400],[400,1]]
+
+for dims, name ,active, swap in niceStructure:
+    net.append(NiceLayer(dims,mlp,active,name,swap))
+dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
 sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 
 '''Starting sampling'''

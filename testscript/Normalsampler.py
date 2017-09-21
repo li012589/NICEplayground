@@ -41,7 +41,7 @@ bins = 7
 print("HMC")
 z = hmc.sample(TimeStep,BatchSize)
 z_o = z[BurnIn:,:]
-z_ = np.reshape(z_o,[-1,2])
+z_ = np.reshape(z_o,[-1,zSize])
 z1_,z2_ = z_[:,0],z_[:,1]
 print("mean: ",np.mean(z1_))
 print("std: ",np.std(z1_))
@@ -52,7 +52,7 @@ print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
 print("MH")
 z_ = mh.sample(TimeStep,BatchSize)
 z_o = z_[BurnIn:,:]
-z_ = np.reshape(z_o,[-1,2])
+z_ = np.reshape(z_o,[-1,zSize])
 z1_,z2_= z_[:,0],z_[:,1]
 print("mean: ",np.mean(z1_))
 print("std: ",np.std(z1_))

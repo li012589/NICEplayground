@@ -55,6 +55,7 @@ ifload = True
 
 z,v = sampler.sample(TimeStep,BatchSize,ifload,True)
 z = z[BurnIn:,:]
+z_ = z[-1,zSize]
 autocorrelation = autoCorrelationTime(z,bins)
 acceptRate = acceptance_rate(z)
 print("autoCorrelation: ",autocorrelation,"acceptRate: ",acceptRate)

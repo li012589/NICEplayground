@@ -2,45 +2,138 @@
 
 This project is a re-write of original [NICEMC program](https://github.com/ermongroup/a-nice-mc).
 
-## Current Status
-
-HMC and MH works fine.
-
-NICE-MC seems running fine, acceptance ratio can be as high as original at Ring2D model.
-
 ## How to 
 
 examples can be found in *testscript* folder.
 
-Run `testscript/Normalsampler.py` to seem the result of HMC and MH of Ring2D model, in the file change `zSize` to corresponding  length(easy way to do it:  `zSize = energyFn.z.get_shape().as_list()[1] ` ). And let `energyFn` equals the model to evaluate. In default, the model is Ring2D and corresponding `zSize` is 2. And the result should be about 0 for mean and 1.456 for std.
+####Test Ring2D model
 
-Run `testscript/NICEtrain.py` to train NICE network, it will not load parameter from previous saving and run for 100'000 iterations by default, and it will save every 1'000 iterations. 
+##### HMC and Metropolis-hasting
 
-After training, run `testscript/NICEsampler.py` to sample using NICE network, in the file change `zSize` to corresponding  dimensions. And let `energyFn` equals the model to evaluate. In default, the model is Ring2D and corresponding `zSize` is 2. 
+Run `python testscript/Normalsampler.py` at the root directory.
 
-**Remember to run all script in root directory of project**
+##### NICE-MC
 
-## GAN computational graph
+Run ` python testscript/NICEtrain.py` to train. In the file, change `ifload` at line 35 to True to load parameters from previous training.
+
+Run `python testscript/NICEsampler.py` to sample. In the file, change `ifload` at line 51 to True to load parameters from previous training.
+
+#### Test Phi4 model
+
+##### HMC and Metropolis-hasting
+
+Run `python testscript/Normal_phi4sampler.py` 
+
+##### NICE-MC
+
+Run `python testscript/NICE_phi4.py` to train, In the file, change `ifload` at line 36 to True to load parameters from previous training.
+
+Run `python testscript/NICE_phi4sampler.py` to sample. In the file, change `ifload` at line 54 to True to load parameters from previous training.
+
+#### Your own model
+
+##### Write model file
+
+In `__init__` function, a `self.z` of tf.placeholder should be implemented, a `self.name` of string should be assigned, and should have default value.
+
+In `__call__` function, a z will be given to `self.z`. Return is the energy of the model of z configuration.
+
+##### Write trainer file
+
+A `piror` function should be implemented to initialize configuration z. Then a model instance shoulde be initialize. Then initialize NICE network by first create a instance of `NiceNetwork` and then initialize it layer by layer using NiceNetwork's `append` method. A discriminator should be create whose inputs has twice the size of energy model's z and return a single float. Then create a `NICEMCsampler` instance. Then, use `NICEMCsampler.train` to train. The pseudocode should look like:
+
+```python
+if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.append(os.getcwd())
+import tensorflow as tf
+import numpy as np
+from NICE.niceLayer import NiceLayer,NiceNetwork
+from NICEMC.NICEMC import NICEMCSampler
+from model.yourModel import yourModel
+from utils.mlp import mlp
+'''Setting model's size'''
+zSize = yourzSize
+'''define sampler to initialize'''
+def prior(batchSize):
+    return np.random.normal(0,1,[batchSize,zSize])
+mod = yourModel()
+'''Define the NICE-MC sampler'''
+m = 2
+b = 8
+ifload = False
+ifsummary = True
+net = NiceNetwork()
+niceStructure = [([[zSize,1stlayerSize],...[1stlayerSize,zSize]],1stlayerName,1stlayerActive,ifchangeXV),...]
+discriminatorStructure = [[2*zSize,1stlayerSize],[1stlayerSize,2ndlayerSize]...]
+for dims, name ,active, swap in niceStructure:
+    net.append(NiceLayer(dims,mlp,active,name,swap))
+dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
+sampler = NICEMCSampler(mod,prior,net,dnet,b,m,pathtoSavedFolder,pathtoSummaryFolder)
+'''Start training'''
+print("Training NICE for "+sampler.energyFn.name)
+sampler.train(epochSteps,totalSteps,bootstrapSteps,bootstrapBatchSize,bootstrapBurnIn,logSteps,evlBatchSize,evlSteps,evlBurnIn,dTrainSteps,trainBatchSize,saveSteps,ifsummary,ifload)
+```
+
+##### Write sampler file
+
+Basically the same as trainer file, only after initialize an instance of `NICEMCsampler` use `NICEMCsampler.sample` to sample. Use `autoCorrelationTime` and `acceptance_rate` to evaulate samples.  The pseudocode should look like:
+
+```python
+if __name__ == "__main__":
+    import sys
+    import os
+    sys.path.append(os.getcwd())
+import tensorflow as tf
+import numpy as np
+from NICE.niceLayer import NiceLayer,NiceNetwork
+from NICEMC.NICEMC import NICEMCSampler
+from utils.autoCorrelation import autoCorrelationTime
+from utils.acceptRate import acceptance_rate
+from model.yourModel import yourModel
+from utils.mlp import mlp
+'''Setting model's size'''
+zSize = yourzSize
+'''define sampler to initialize'''
+def prior(batchSize):
+    return np.random.normal(0,1,[batchSize,zSize])
+'''Define the model to evaluate'''
+mod = yourModel()
+'''Define the same NICE-MC sampler as in training'''
+m = 2
+b = 8
+net = NiceNetwork()
+niceStructure = [([[zSize,1stlayerSize],...[1stlayerSize,zSize]],1stlayerName,1stlayerActive,ifchangeXV),...]
+discriminatorStructure = [[2*zSize,1stlayerSize],[1stlayerSize,2ndlayerSize]...]
+for dims, name ,active, swap in niceStructure:
+    net.append(NiceLayer(dims,mlp,active,name,swap))
+dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
+sampler = NICEMCSampler(mod,prior,net,dnet,b,m,pathtoSavedFolder,pathtoSummaryFolder)
+'''Starting sampling'''
+TimeStep = TimeStep
+BatchSize = BatchSize
+BurnIn = BurnIn
+bins = bins
+ifload = ifyourWant2loadPreviousTraining
+z,v = sampler.sample(TimeStep,BatchSize,ifload,True)
+z = z[BurnIn:,:]
+z_ = z[-1,zSize]
+print("mean: ",np.mean(z))
+print("std: ",np.std(z))
+zt = np.mean(z,2)
+autoCorrelation = autoCorrelationTime(zt,bins)
+acceptRate = acceptance_rate(z)
+print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
+```
 
 
 
-## NICE network 
+**Run all script in root directory of project**
 
+## Test Result
 
-
-## Folder Structure
-
-
-
-## Saving Structure
-
-### demo
-
-
-
-## Result
-
-### Ring2D 
+### Ring2D
 
 After 200'000 iterations of training of NICE-MC, sampling 800 samples of Ring2D model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
 
@@ -62,3 +155,17 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 | MH      | 0.164351   | 1.96883 | 0.00642 | 12.791     |
 | HMC     | -0.421223  | 2.07029 | 0.8738  | 1.68466    |
 | NICE-MC | -0.0109525 | 2.11119 | 0.33646 | 0.893479   |
+
+## GAN computational graph
+
+## Saving Structure
+
+By default, NICE network savings can be found at *savedNetwork* folder and tensor flow summary files at *tfSummary* folder. Demo savings can be found at *demo* folder. In *savedNetwork* folder, different models are stored in different folders naming after energy model's name when training.
+
+### demo
+
+Move all folders at *demo* folder to *savedNetwork* folder and configure `ifload = True`to use demo savings.
+
+## About NICE network and NICE-MC 
+
+See etc/note.md or the original paper at https://arxiv.org/abs/1706.07561 and https://arxiv.org/abs/1410.8516

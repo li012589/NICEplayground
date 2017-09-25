@@ -44,12 +44,12 @@ After training, run `testscript/NICEsampler.py` to sample using NICE network, in
 
 After 200'000 iterations of training of NICE-MC, sampling 800 samples of Ring2D model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
 
-| Algor.       | mean       | std     | accept. | autocor. t       |
-| :----------- | ---------- | ------- | ------- | ---------------- |
-| MH           | 0.00859793 | 1.44885 | 0.33776 | 0.780032907052   |
-| HMC          | 0.00535887 | 1.45801 | 0.9919  | 0.659679205674   |
-| NICE-MC      | -0.0028535 | 1.454   | 0.69926 | -0.115518120 (?) |
-| Ground truth | 0          | 1.456   | NA      | NA               |
+| Algor.       | mean        | std     | accept. | autocor. t     |
+| :----------- | ----------- | ------- | ------- | -------------- |
+| MH           | 0.00358582  | 1.45522 | 0.3388  | 13.9674        |
+| HMC          | -0.00969827 | 1.45031 | 0.9923  | 6.46388        |
+| NICE-MC      | 0.00226861  | 1.45189 | 0.6668  | -0.0995518 (?) |
+| Ground truth | 0           | 1.456   | NA      | NA             |
 
 ### Phi4
 
@@ -57,8 +57,8 @@ Evaluating $3\times3, \kappa=1, \beta = 1$ Ph4.
 
 After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
 
-| Algor.  | mean      | std     | accept. | autocor. t         |
-| :------ | --------- | ------- | ------- | ------------------ |
-| MH      | 0.0293503 | 1.99719 | 0.00578 | -0.293327202745(?) |
-| HMC     | -0.675433 | 2.00156 | 0.87384 | -0.464749906862(?) |
-| NICE-MC | 0.0408737 | 2.11057 | 0.33308 | 0.170936615726     |
+| Algor.  | mean       | std     | accept. | autocor. t |
+| :------ | ---------- | ------- | ------- | ---------- |
+| MH      | 0.164351   | 1.96883 | 0.00642 | 12.791     |
+| HMC     | -0.421223  | 2.07029 | 0.8738  | 1.68466    |
+| NICE-MC | -0.0109525 | 2.11119 | 0.33646 | 0.893479   |

@@ -32,8 +32,6 @@ mod = Ring2d()
 
 m = 2
 b = 8
-ifload = False
-ifsummary = True
 net = NiceNetwork()
 niceStructure = [([[zSize,400],[400,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,400],[400,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,400],[400,zSize]],'generator/v2',tf.nn.relu,False)]
 discriminatorStructure = [[2*zSize,400],[400,400],[400,400],[400,1]]

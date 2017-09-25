@@ -56,8 +56,10 @@ ifload = True
 z,v = sampler.sample(TimeStep,BatchSize,ifload,True)
 z = z[BurnIn:,:]
 z_ = z[-1,zSize]
-autocorrelation = autoCorrelationTime(z[:,:,0],bins)
-acceptRate = acceptance_rate(z)
-print("autoCorrelation: ",autocorrelation,"acceptRate: ",acceptRate)
 print("mean: ",np.mean(z))
 print("std: ",np.std(z))
+zt = np.mean(z,2)
+#print(zt.shape)
+autoCorrelation = autoCorrelationTime(zt,bins)
+acceptRate = acceptance_rate(z)
+print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))

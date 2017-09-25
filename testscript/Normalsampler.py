@@ -36,7 +36,7 @@ mh = MHSampler(energyFn,prior)
 TimeStep = 800
 BatchSize = 100
 BurnIn = 300
-bins = 7
+bins = 2
 
 print("HMC")
 z = hmc.sample(TimeStep,BatchSize)

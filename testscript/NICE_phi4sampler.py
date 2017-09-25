@@ -50,7 +50,7 @@ sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 TimeStep = 800
 BatchSize = 100
 BurnIn = 300
-bins = 7
+bins = 2
 ifload = True
 
 z,v = sampler.sample(TimeStep,BatchSize,ifload,True)

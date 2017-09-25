@@ -47,17 +47,17 @@ sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 TimeStep = 800
 BatchSize = 100
 BurnIn = 300
-bins = 7
+bins = 2
 ifload = True
 
 z,v = sampler.sample(TimeStep,BatchSize,ifload,True)
 z = z[BurnIn:,:]
+z_ = np.reshape(z,[-1,zSize])
+z0,z1 = z_[:,0],z_[:,1]
+print("mean:",(np.mean(z0)))
+print("std:",np.std(z0))
+#print(np.mean(z1))
+#print(np.std(z1))
 autocorrelation = autoCorrelationTime(z[:,:,0],bins)
 acceptRate = acceptance_rate(z)
 print("autoCorrelation: ",autocorrelation,"acceptRate: ",acceptRate)
-z_ = np.reshape(z,[-1,zSize])
-z0,z1 = z_[:,0],z_[:,1]
-print(np.mean(z0))
-print(np.std(z0))
-print(np.mean(z1))
-print(np.std(z1))

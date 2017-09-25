@@ -35,8 +35,6 @@ mod = phi4(n,l,dim,kappa,lamb)
 '''Define the same NICE-MC sampler as in training'''
 m = 2
 b = 8
-ifload = False
-ifsummary = True
 net = NiceNetwork()
 niceStructure = [([[zSize,400],[400,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,400],[400,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,400],[400,zSize]],'generator/v2',tf.nn.relu,False)]
 discriminatorStructure = [[2*zSize,400],[400,400],[400,400],[400,1]]
@@ -59,7 +57,6 @@ z_ = z[-1,zSize]
 print("mean: ",np.mean(z))
 print("std: ",np.std(z))
 zt = np.mean(z,2)
-#print(zt.shape)
 autoCorrelation = autoCorrelationTime(zt,bins)
 acceptRate = acceptance_rate(z)
 print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))

@@ -52,7 +52,7 @@ ifload = True
 
 z,v = sampler.sample(TimeStep,BatchSize,ifload,True)
 z = z[BurnIn:,:]
-autocorrelation = autoCorrelationTime(z,bins)
+autocorrelation = autoCorrelationTime(z[:,:,0],bins)
 acceptRate = acceptance_rate(z)
 print("autoCorrelation: ",autocorrelation,"acceptRate: ",acceptRate)
 z_ = np.reshape(z,[-1,zSize])

@@ -45,7 +45,7 @@ z_ = np.reshape(z_o,[-1,zSize])
 z1_,z2_ = z_[:,0],z_[:,1]
 print("mean: ",np.mean(z1_))
 print("std: ",np.std(z1_))
-autoCorrelation =  autoCorrelationTime(z_,bins)
+autoCorrelation =  autoCorrelationTime(z_o[:,:,0],bins)
 acceptRate = acceptance_rate(z_o)
 print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
 
@@ -56,6 +56,6 @@ z_ = np.reshape(z_o,[-1,zSize])
 z1_,z2_= z_[:,0],z_[:,1]
 print("mean: ",np.mean(z1_))
 print("std: ",np.std(z1_))
-autoCorrelation =  autoCorrelationTime(z_,bins)
+autoCorrelation =  autoCorrelationTime(z_o[:,:,0],bins)
 acceptRate = acceptance_rate(z_o)
 print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))

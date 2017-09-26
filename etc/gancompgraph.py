@@ -24,10 +24,10 @@ g.add_edge("v_","NiceNetworkOperator1,ifMH = True")
 g.add_edge("NiceNetworkOperator1,ifMH = True","z1")
 g.add_edge("NiceNetworkOperator1,ifMH = True","v1")
 
-g.add_node("stop_gradient",shape='box')
+g.add_node("tf.stop_gradient",shape='box')
 g.add_edge("z1","tf.stop_gradient")
 g.add_node("z1_")
-g.add_edge("stop_gradient","z1_")
+g.add_edge("tf.stop_gradient","z1_")
 
 g.add_node("v1_")
 g.add_node("NiceNetworkOperator2,ifMH = True",shape='box')

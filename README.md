@@ -218,7 +218,7 @@ Move all folders at *demo* folder to *savedNetwork* folder and configure `ifload
 
 ## GAN Computational Graph
 
-
+![file](etc/file.png)
 
 ## About NICE network and NICE-MC 
 

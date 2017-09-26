@@ -6,7 +6,7 @@ This project is a re-write of original [NICEMC program](https://github.com/ermon
 
 examples can be found in *testscript* folder.
 
-####Test Ring2D model
+#### Test Ring2D model
 
 ##### HMC and Metropolis-hasting
 

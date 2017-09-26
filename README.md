@@ -208,8 +208,6 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 	└── parameterInit.py
 ```
 
-## GAN Computational Graph
-
 ## Saving Structure
 
 By default, NICE network savings can be found at *savedNetwork* folder and tensor flow summary files at *tfSummary* folder. Demo savings can be found at *demo* folder. In *savedNetwork* folder, different models are stored in different folders naming after energy model's name when training.
@@ -217,6 +215,10 @@ By default, NICE network savings can be found at *savedNetwork* folder and tenso
 ### demo
 
 Move all folders at *demo* folder to *savedNetwork* folder and configure `ifload = True`to use demo savings.
+
+## GAN Computational Graph
+
+
 
 ## About NICE network and NICE-MC 
 

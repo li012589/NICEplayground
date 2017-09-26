@@ -45,7 +45,7 @@ g.add_edge("NiceNetworkOperator3,ifMH = True","v3")
 
 g.add_node("tf.concat0")
 g.add_node("zConcated")
-g.add_edge("self.realData","tf.concat")
+#g.add_edge("self.realData","tf.concat")
 g.add_edge("z1","tf.concat0")
 g.add_edge("z2","tf.concat0")
 g.add_edge("z3","tf.concat0")

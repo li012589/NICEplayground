@@ -146,7 +146,7 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Ring2D 
 
 ### Phi4
 
-Evaluating $ 3\times3, \kappa=1, \beta = 1 $ Ph4. 
+Evaluating $ 3\times3, \kappa=1, \beta = 1 $ Phi4. 
 
 After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 model with a batch size of 100, drop first 300 samples. HMC, MH and NICE-MC yields:
 
@@ -156,7 +156,59 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 | HMC     | -0.421223  | 2.07029 | 0.8738  | 1.68466    |
 | NICE-MC | -0.0109525 | 2.11119 | 0.33646 | 0.893479   |
 
-## GAN computational graph
+## Project Folder Tree
+
+├── Metropolois
+│   └── Metropolis.py 	# Calculate the Metropolis acceptance ratio
+├── NICE
+│   └── niceLayer.py	# Implement of NICE network	
+├── NICEMC
+│   └── NICEMC.py		# Implement of NICE-MC, especially GAN part
+├── README.md		# This readme file
+├── demo				# Saving for demo play, models are specified by different folders
+│   ├── Ring2d
+│   │ ├── checkpoint
+│   └── phi4
+│       └── checkpoint
+├── etc				# Some files to serve readme file
+│   ├── log.md
+│   └── note.md
+├── hmc				# Implement of Hydird Monte Carlo
+│   └── hmc.py
+├── model				# Implements of different energy model
+│   ├── Ising.py
+│   ├── TGaussian.py
+│   ├── correlationDoubleGaussian.py
+│   ├── correlationTGaussian.py
+│   ├── doubleGaussian.py
+│   ├── phi4.py
+│   └── ring2d.py
+├── savedNetwork		# Store savings for training, models are specified by different folders
+│   ├── Ring2d
+│   │   └── checkpoint
+│   ├── phi4
+│   │   └── checkpoint
+├── testscript			# Test scripts
+│   ├── NICE_phi4.py
+│   ├── NICE_phi4sampler.py
+│   ├── NICEsampler.py
+│   ├── NICEtrain.py
+│   ├── Normal_phi4sampler.py
+│   └── Normalsampler.py
+├── tfSummary			# Store summary files of tensorboard
+│   └── placeholder
+└── utils				# Some scripts used
+
+​	├── MetropolisHastingsAccept.py
+
+​	├── acceptRate.py
+​	├── autoCorrelation.py
+​	├── expLogger.py
+​	├── hamiltonian.py
+​	├── mlp.py
+​	└── parameterInit.py
+
+## GAN Computational Graph
 
 ## Saving Structure
 

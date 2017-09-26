@@ -159,24 +159,24 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 ## Project Folder Tree
 
 ```
-├── Metropolois 	# Calculate the Metropolis acceptance ratio
+├── Metropolois     # Calculate the Metropolis acceptance ratio
 │   └── Metropolis.py  
-├── NICE			# Implement of NICE network
+├── NICE            # Implement of NICE network
 │   └── niceLayer.py
-├── NICEMC			# Implement of NICE-MC, especially GAN part
+├── NICEMC          # Implement of NICE-MC, especially GAN part
 │   └── NICEMC.py	
-├── README.md		# This readme file
-├── demo			# Saving for demo play, models are specified by different folders
+├── README.md       # This readme file
+├── demo            # Saving for demo play, models are specified by different folders
 │   ├── Ring2d
 │   │ ├── checkpoint
 │   └── phi4
 │       └── checkpoint
-├── etc				# Some files to serve readme file
+├── etc             # Some files to serve readme file
 │   ├── log.md
 │   └── note.md
-├── hmc				# Implement of Hydird Monte Carlo
+├── hmc             # Implement of Hydird Monte Carlo
 │   └── hmc.py
-├── model			# Implements of different energy model
+├── model           # Implements of different energy model
 │   ├── Ising.py
 │   ├── TGaussian.py
 │   ├── correlationDoubleGaussian.py
@@ -184,21 +184,21 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 │   ├── doubleGaussian.py
 │   ├── phi4.py
 │   └── ring2d.py
-├── savedNetwork	# Store savings for training, models are specified by different folders
+├── savedNetwork    # Store savings for training, models are specified by different folders
 │   ├── Ring2d
 │   │   └── checkpoint
 │   ├── phi4
 │   │   └── checkpoint
-├── testscript		# Test scripts
+├── testscript      # Test scripts
 │   ├── NICE_phi4.py
 │   ├── NICE_phi4sampler.py
 │   ├── NICEsampler.py
 │   ├── NICEtrain.py
 │   ├── Normal_phi4sampler.py
 │   └── Normalsampler.py
-├── tfSummary		# Store summary files of tensorboard
+├── tfSummary       # Store summary files of tensorboard
 │   └── placeholder
-└── utils			# Some scripts used
+└── utils           # Some scripts used
 	├── MetropolisHastingsAccept.py
 	├── acceptRate.py
 	├── autoCorrelation.py

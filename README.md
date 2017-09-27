@@ -187,7 +187,7 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 ├── savedNetwork    # Store savings for training, models are specified by different folders
 │   ├── Ring2d
 │   │   └── checkpoint
-│   ├── phi4
+│   └── phi4
 │       └── checkpoint
 ├── testscript      # Test scripts
 │   ├── NICE_phi4.py

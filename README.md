@@ -168,7 +168,7 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 ├── README.md       # This readme file
 ├── demo            # Saving for demo play, models are specified by different folders
 │   ├── Ring2d
-│   │ ├── checkpoint
+│   │   └── checkpoint
 │   └── phi4
 │       └── checkpoint
 ├── etc             # Some files to serve readme file
@@ -188,7 +188,7 @@ After 200'000 iterations of training of NICE-MC, sampling 800 samples of Phi4 mo
 │   ├── Ring2d
 │   │   └── checkpoint
 │   ├── phi4
-│   │   └── checkpoint
+│       └── checkpoint
 ├── testscript      # Test scripts
 │   ├── NICE_phi4.py
 │   ├── NICE_phi4sampler.py

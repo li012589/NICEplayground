@@ -30,7 +30,7 @@ l = 3
 kappa = 1
 lamb = 1
 
-mod = phi4(n,l,dim,kappa,lamb)
+mod = phi4(n,l,dim,kappa,lamb,"phi4_3D")
 
 '''Define the same NICE-MC sampler as in training'''
 m = 2

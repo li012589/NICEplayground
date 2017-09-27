@@ -19,7 +19,12 @@ def prior(bs):
     return np.random.normal(0,1,[bs,zSize])
 
 '''Define the model to evaluate'''
-energyFn = phi4(9,3,2,1,1)
+n = 9
+dim = 2
+l = 3
+kappa = 1
+lamb = 1
+energyFn = phi4(n,l,dim,kappa,lamb)
 
 '''Define sampler'''
 hmc = HMCSampler(energyFn,prior)
@@ -37,7 +42,8 @@ z_o = z[BurnIn:,:]
 z_ = np.reshape(z_o,[-1,zSize])
 print("mean: ",np.mean(z_))
 print("std: ",np.std(z_))
-autoCorrelation =  autoCorrelationTime(z_o[:,:,0],bins)
+zt = np.mean(z_o,2)
+autoCorrelation =  autoCorrelationTime(zt,bins)
 acceptRate = acceptance_rate(z_o)
 print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
 

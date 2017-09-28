@@ -52,9 +52,9 @@ class phi4:
             def fn(S,i):
                 phin = tf.zeros_like(tf.slice(z,[0,0],[-1,1]),dtype=tf.float32) #TODO: init dynamically constant tensor
                 n = tf.constant(0)
-                cc = lambda phin,i: i<2*self.d
+                cc = lambda phin,i: i<self.d
                 def ffn(tmpphin,tmpn):
-                    tmpphin += tf.cast(tf.slice(z,[0,self.hoppingTable[i][tmpn]],[-1,1]),dtype=tf.float32)
+                    tmpphin += tf.cast(tf.slice(z,[0,self.hoppingTable[i][2*tmpn]],[-1,1]),dtype=tf.float32)
                     tmpn += 1
                     return [tmpphin,tmpn]
                 phin_,n_ = tf.while_loop(cc,ffn,[phin,n])
@@ -82,6 +82,7 @@ if __name__ == "__main__":
     t = phi4(9,3,2,1,1)
     #z = prior(2,4)
     z = np.array([[1,2,3,4,5,6,7,8,9],[2,3,4,5,6,7,8,9,10]])
+    #z = np.array([[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27]])
     print(z)
     sess = tf.InteractiveSession()
     #print(sess.run(t.z,feed_dict={t.z:z}))
@@ -91,4 +92,4 @@ if __name__ == "__main__":
     #print(sess.run(i))
     tmp = tf.placeholder(tf.float32,[None,4])
     #print(sess.run(tf.slice(tmp,[0,t.hoppingTable[i][j]],[-1,1]),feed_dict={tmp:z}))
-    print(sess.run(t(z)))
+    print(sess.run(t(t.z),feed_dict={t.z:z}))

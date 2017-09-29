@@ -22,9 +22,8 @@ def prior(batchSize):
 n = 27
 dim = 3
 l = 3
-kappa = 1.145
-#lamb = 0.15
-Lamb = [0.15]#[i/100 for i in range(15,22)]
+lamb = 1.145
+KAPPA = [0.15,0.22]#[i/100 for i in range(15,22)]
 #print(Lamb)
 '''Start sampling'''
 TimeStep = 800
@@ -33,7 +32,7 @@ BurnIn = 300
 bins = 2
 
 res = []
-for lamb in Lamb:
+for kappa in KAPPA:
     print(lamb)
     energyFn = phi4(n,l,dim,kappa,lamb)
     '''Define sampler'''

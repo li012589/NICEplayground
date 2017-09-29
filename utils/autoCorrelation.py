@@ -39,8 +39,14 @@ def auto_time(errors):
     act = (.5*(errors[-1,:]**2/errors[0,:]**2 - 1.))
     #print("act:")
     #print(act)
-    return(np.mean(act))
+    return np.mean(act),np.mean(errors[-1,:])
 
 def autoCorrelationTime(samples,bins=7):
     errors = binning_analysis(samples,bins)
-    return auto_time(errors)
+    tau,error =  auto_time(errors)
+    return tau
+
+def autoCorrelationTimewithErr(samples,bins=7):
+    errors = binning_analysis(samples,bins)
+    tau,error =  auto_time(errors)
+    return tau,error

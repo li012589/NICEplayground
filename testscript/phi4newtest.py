@@ -27,8 +27,8 @@ def prior(batchSize):
 n = 27
 dim = 3
 l = 3
-kappa = 1
-lamb = 1
+kappa = 0.18
+lamb = 1.145
 
 mod = phi4(n,l,dim,kappa,lamb,"phi4_3D")
 

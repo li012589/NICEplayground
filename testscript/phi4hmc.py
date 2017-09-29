@@ -23,7 +23,7 @@ n = 27
 dim = 3
 l = 3
 lamb = 1.145
-KAPPA = [0.15,0.22]#[i/100 for i in range(15,22)]
+KAPPA = [i/100 for i in range(15,22+1)]
 #print(Lamb)
 '''Start sampling'''
 TimeStep = 800
@@ -33,21 +33,22 @@ bins = 2
 
 res = []
 for kappa in KAPPA:
-    print(lamb)
     energyFn = phi4(n,l,dim,kappa,lamb)
     '''Define sampler'''
     hmc = HMCSampler(energyFn,prior)
     z = hmc.sample(TimeStep,BatchSize)
     z_o = z[BurnIn:,:]
-    print(z_o[0,-10:,:])
-    m_abs = np.absolute(z_o)
-    m_abs = np.mean(m_abs,2)/zSize
-    print(m_abs.shape)
+    #print(z_o[0,-10:,:])
+    m_abs = np.mean(z_o,2)
+    m_abs = np.absolute(m_abs)
+    #print(m_abs.shape)
     m_abs_p = np.mean(m_abs)
-    print(m_abs_p)
+    print("kappa:",kappa)
+    print("measure: <|m|/V>",m_abs_p)
     res.append(m_abs_p)
     autoCorrelation =  autoCorrelationTime(m_abs,bins)
     acceptRate = acceptance_rate(z_o)
     print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
 
+print("measure: <|m|/V>")
 print(res)

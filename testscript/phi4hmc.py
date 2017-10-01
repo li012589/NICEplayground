@@ -54,4 +54,4 @@ for kappa in KAPPA:
 print("measure: <|m|/V>")
 print(res)
 print("error:")
-print(error)
+print(errors)

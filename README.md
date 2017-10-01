@@ -222,4 +222,4 @@ Move all folders at *demo* folder to *savedNetwork* folder and configure `ifload
 
 ## About NICE network and NICE-MC 
 
-See etc/note.md or the original paper at https://arxiv.org/abs/1706.07561 and https://arxiv.org/abs/1410.8516
+See *etc/note.md* or the original paper at https://arxiv.org/abs/1706.07561 and https://arxiv.org/abs/1410.8516

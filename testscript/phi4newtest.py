@@ -7,14 +7,23 @@ import tensorflow as tf
 import numpy as np
 from NICE.niceLayer import NiceLayer,NiceNetwork
 from NICEMC.NICEMC import NICEMCSampler
-from utils.autoCorrelation import autoCorrelationTime
+from utils.autoCorrelation import autoCorrelationTimewithErr
 from utils.acceptRate import acceptance_rate
 
 from model.phi4 import phi4
 from utils.mlp import mlp
 
+'''Define the model to evaluate'''
+dim = 3
+l = 3
+n = l**dim
+kappa = 0.18
+lamb = 1.145
+
+mod = phi4(n,l,dim,kappa,lamb,"phi4_3D_"+str(n)+"_"+str(lamb)+"_"+str(kappa))
+
 '''Setting model's size'''
-zSize = 27
+zSize = n
 
 def leaky_relu(x, alpha=0.2):
     return tf.maximum(tf.minimum(0.0, alpha * x), x)
@@ -22,15 +31,6 @@ def leaky_relu(x, alpha=0.2):
 '''define sampler to initialize'''
 def prior(batchSize):
     return np.random.normal(0,1,[batchSize,zSize])
-
-'''Define the model to evaluate'''
-n = 27
-dim = 3
-l = 3
-kappa = 0.18
-lamb = 1.145
-
-mod = phi4(n,l,dim,kappa,lamb,"phi4_3D")
 
 '''Define the same NICE-MC sampler as in training'''
 m = 2
@@ -52,11 +52,12 @@ bins = 2
 ifload = True
 
 z,v = sampler.sample(TimeStep,BatchSize,ifload,True)
-z = z[BurnIn:,:]
-z_ = z[-1,zSize]
-print("mean: ",np.mean(z))
-print("std: ",np.std(z))
-zt = np.mean(z,2)
-autoCorrelation = autoCorrelationTime(zt,bins)
-acceptRate = acceptance_rate(z)
+z_o = z[BurnIn:,:]
+m_abs = np.mean(z_o,2)
+m_abs = np.absolute(m_abs)
+m_abs_p = np.mean(m_abs)
+autoCorrelation,error =  autoCorrelationTimewithErr(m_abs,bins)
+acceptRate = acceptance_rate(z_o)
+print("kappa:",kappa)
+print("measure: <|m|/V>",m_abs_p,"with error:",error)
 print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))

@@ -11,8 +11,17 @@ from NICEMC.NICEMC import NICEMCSampler
 from model.phi4 import phi4
 from utils.mlp import mlp
 
+'''Define the model to evaluate'''
+dim = 3
+l = 3
+n = l**dim
+kappa = 0.18
+lamb = 1.145
+
+mod = phi4(n,l,dim,kappa,lamb,"phi4_3D"+str(n)+"_"+str(lamb)+"_"+str(kappa))
+
 '''Setting model's size'''
-zSize = 27
+zSize = n
 
 def leaky_relu(x, alpha=0.2):
     return tf.maximum(tf.minimum(0.0, alpha * x), x)
@@ -20,15 +29,6 @@ def leaky_relu(x, alpha=0.2):
 '''define sampler to initialize'''
 def prior(batchSize):
     return np.random.normal(0,1,[batchSize,zSize])
-
-'''Define the model to evaluate'''
-n = 27
-dim = 3
-l = 3
-kappa = 0.18
-lamb = 1.145
-
-mod = phi4(n,l,dim,kappa,lamb,"phi4_3D")
 
 '''Define the NICE-MC sampler'''
 m = 2

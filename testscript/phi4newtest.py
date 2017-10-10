@@ -20,7 +20,7 @@ n = l**dim
 kappa = 0.18
 lamb = 1.145
 
-mod = phi4(n,l,dim,kappa,lamb,"phi4_3D_"+str(n)+"_"+str(lamb)+"_"+str(kappa))
+mod = phi4(n,l,dim,kappa,lamb,"phi4_3D"+str(n)+"_"+str(lamb)+"_"+str(kappa))
 
 '''Setting model's size'''
 zSize = n

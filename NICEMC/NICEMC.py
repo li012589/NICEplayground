@@ -82,7 +82,7 @@ class NICEMCSampler:
                 print("Cannot create separate folder, using savePath")
                 self.savePath = savePath
         self.summaryPath = summaryPath
-        if sess:
+        if sess is None:
             print("Using default session")
             self.sess = tf.InteractiveSession()
         else:

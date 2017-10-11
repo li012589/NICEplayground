@@ -42,7 +42,12 @@ discriminatorStructure = [[2*zSize,400],[400,400],[400,400],[400,1]]
 for dims, name ,active, swap in niceStructure:
     net.append(NiceLayer(dims,mlp,active,name,swap))
 dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
-sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
+
+'''Configure to use customized session'''
+config = tf.ConfigProto(allow_soft_placement=True)
+sess = tf.Session(config=config)
+
+sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary',sess=sess)
 
 '''Start training'''
 print("Training NICE for "+sampler.energyFn.name)

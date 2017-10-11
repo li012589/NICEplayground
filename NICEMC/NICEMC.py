@@ -64,7 +64,7 @@ class NiceNetworkOperator:
         return tf.scan(fn,elems,inputs,back_prop=flag)
 
 class NICEMCSampler:
-    def __init__(self,energyFn,prior,network,discriminator,b,m,savePath,summaryPath,scale=10.0,eta=1.0,learningRate = 5e-4, beta1 = 0.5, beta2 = 0.9):
+    def __init__(self,energyFn,prior,network,discriminator,b,m,savePath,summaryPath,scale=10.0,eta=1.0,learningRate = 5e-4, beta1 = 0.5, beta2 = 0.9,sess=None):
         self.energyFn = energyFn
         self.prior = prior
         self.Operator = NiceNetworkOperator(network,energyFn)
@@ -82,7 +82,10 @@ class NICEMCSampler:
                 print("Cannot create separate folder, using savePath")
                 self.savePath = savePath
         self.summaryPath = summaryPath
-        self.sess = tf.InteractiveSession()
+        if sess:
+            self.sess = tf.InteractiveSession()
+        else:
+            print("Using customized tf.Session()")
         self.learningRate = learningRate
         self.beta1 = beta1
         self.beta2 = beta2

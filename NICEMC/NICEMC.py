@@ -83,9 +83,11 @@ class NICEMCSampler:
                 self.savePath = savePath
         self.summaryPath = summaryPath
         if sess:
+            print("Using default session")
             self.sess = tf.InteractiveSession()
         else:
-            print("Using customized tf.Session()")
+            print("Using customized session")
+            self.sess = sess
         self.learningRate = learningRate
         self.beta1 = beta1
         self.beta2 = beta2

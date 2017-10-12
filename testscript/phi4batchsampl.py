@@ -33,6 +33,8 @@ saveName = "phi4_3D"+str(n)+"_"+str(1.145)+"_"+str(0.18)
 res = []
 errors = []
 cond = []
+autos=[]
+arates=[]
 '''Define the same NICE-MC sampler as in training'''
 m = 2
 b = 8
@@ -71,8 +73,17 @@ for kappa in Kappa:
         cond.append('l:'+str(lamb)+";"+"k"+str(kappa))
         print("measure: <|m|/V>",m_abs_p,"with error:",error)
         print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
-        tf.tf.reset_default_graph()
+        autos.append(autoCorrelation)
+        arates.append(autoCorrelation)
+        tf.reset_default_graph()
 
+print("Condition:")
 print(cond)
+print("measure: <|m|/V>")
 print(res)
+print("Autorrelation Time:")
+print(autos)
+print("Acceptance Rate:")
+print(arates)
+print("Errors:")
 print(errors)

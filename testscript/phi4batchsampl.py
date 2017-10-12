@@ -20,7 +20,7 @@ def leaky_relu(x, alpha=0.2):
 dim = 3
 l = 3
 n = l**dim
-Kappa = [0.18]
+Kappa = [0.18,0.22]
 Lamb = [1.145]
 
 
@@ -30,24 +30,24 @@ def prior(batchSize):
 
 saveName = "phi4_3D"+str(n)+"_"+str(1.145)+"_"+str(0.18)
 
-mod = phi4(n,l,dim,0.15,1.145,saveName)
 res = []
 errors = []
 cond = []
 '''Define the same NICE-MC sampler as in training'''
 m = 2
 b = 8
-net = NiceNetwork()
-niceStructure = [([[n,400],[400,n]],'generator/v1',tf.nn.relu,False),([[n,400],[400,n]],'generator/x1',tf.nn.relu,True),([[n,400],[400,n]],'generator/v2',tf.nn.relu,False)]
-discriminatorStructure = [[2*n,400],[400,400],[400,400],[400,1]]
-
-for dims, name ,active, swap in niceStructure:
-    net.append(NiceLayer(dims,mlp,active,name,swap))
-dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
-sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 for kappa in Kappa:
     for lamb in Lamb:
-        mod.reload(n,l,dim,kappa,lamb)
+        #mod.reload(n,l,dim,kappa,lamb)
+        net = NiceNetwork()
+        niceStructure = [([[n,400],[400,n]],'generator/v1',tf.nn.relu,False),([[n,400],[400,n]],'generator/x1',tf.nn.relu,True),([[n,400],[400,n]],'generator/v2',tf.nn.relu,False)]
+        discriminatorStructure = [[2*n,400],[400,400],[400,400],[400,1]]
+
+        for dims, name ,active, swap in niceStructure:
+            net.append(NiceLayer(dims,mlp,active,name,swap))
+        dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
+        mod = phi4(n,l,dim,kappa,lamb,saveName)
+        sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 
         '''Starting sampling'''
         TimeStep = 800
@@ -64,13 +64,14 @@ for kappa in Kappa:
         m_abs_p = np.mean(m_abs)
         autoCorrelation,error =  autoCorrelationTimewithErr(m_abs,bins)
         acceptRate = acceptance_rate(z_o)
-        print("kappa:",kappa)
-        print("lambda:",lamb)
+        print("kappa:",mod.kappa)
+        print("lambda:",mod.lamb)
         res.append(m_abs_p)
         errors.append(error)
         cond.append('l:'+str(lamb)+";"+"k"+str(kappa))
         print("measure: <|m|/V>",m_abs_p,"with error:",error)
         print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
+        tf.tf.reset_default_graph()
 
 print(cond)
 print(res)

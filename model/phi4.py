@@ -89,6 +89,7 @@ if __name__ == "__main__":
     def prior(bs,n):
         return np.random.normal(0,1,[bs,n])
     t = phi4(9,3,2,1,1)
+    zt = phi4(9,3,2,0.1,0.1)
     #z = prior(2,4)
     z = np.array([[1,2,3,4,5,6,7,8,9],[2,3,4,5,6,7,8,9,10]])
     #z = np.array([[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27]])
@@ -102,3 +103,6 @@ if __name__ == "__main__":
     tmp = tf.placeholder(tf.float32,[None,4])
     #print(sess.run(tf.slice(tmp,[0,t.hoppingTable[i][j]],[-1,1]),feed_dict={tmp:z}))
     print(sess.run(t(t.z),feed_dict={t.z:z}))
+    print(sess.run(zt(zt.z),feed_dict={zt.z:z}))
+    zt.reload(9,3,2,1,1)
+    print(sess.run(zt(zt.z),feed_dict={zt.z:z}))

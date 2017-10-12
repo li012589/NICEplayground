@@ -29,7 +29,7 @@ def prior(batchSize):
     return np.random.normal(0,1,[batchSize,n])
 
 res = []
-error = []
+errors = []
 cond = []
 for kappa in Kappa:
     for lamb in Lamb:
@@ -63,7 +63,7 @@ for kappa in Kappa:
         print("kappa:",kappa)
         print("lambda:",lamb)
         res.append(m_abs_p)
-        error.append(error)
+        errors.append(error)
         cond.append('l:'+str(lamb)+";"+"k"+str(kappa))
         print("measure: <|m|/V>",m_abs_p,"with error:",error)
         print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))

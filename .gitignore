@@ -2,6 +2,7 @@
 **/*.pyc
 **/.DS_Store
 **/test.py
+**/*.png
 test/*
 tfSummary/*
 !tfSummary/placehodler

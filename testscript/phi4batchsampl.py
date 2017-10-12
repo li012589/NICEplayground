@@ -34,20 +34,20 @@ mod = phi4(n,l,dim,0.15,1.145,saveName)
 res = []
 errors = []
 cond = []
+'''Define the same NICE-MC sampler as in training'''
+m = 2
+b = 8
+net = NiceNetwork()
+niceStructure = [([[n,400],[400,n]],'generator/v1',tf.nn.relu,False),([[n,400],[400,n]],'generator/x1',tf.nn.relu,True),([[n,400],[400,n]],'generator/v2',tf.nn.relu,False)]
+discriminatorStructure = [[2*n,400],[400,400],[400,400],[400,1]]
+
+for dims, name ,active, swap in niceStructure:
+    net.append(NiceLayer(dims,mlp,active,name,swap))
+dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
+sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 for kappa in Kappa:
     for lamb in Lamb:
-        '''Define the same NICE-MC sampler as in training'''
-        m = 2
-        b = 8
-        net = NiceNetwork()
-        niceStructure = [([[n,400],[400,n]],'generator/v1',tf.nn.relu,False),([[n,400],[400,n]],'generator/x1',tf.nn.relu,True),([[n,400],[400,n]],'generator/v2',tf.nn.relu,False)]
-        discriminatorStructure = [[2*n,400],[400,400],[400,400],[400,1]]
-
-        for dims, name ,active, swap in niceStructure:
-            net.append(NiceLayer(dims,mlp,active,name,swap))
-        dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
         mod.reload(n,l,dim,kappa,lamb)
-        sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 
         '''Starting sampling'''
         TimeStep = 800

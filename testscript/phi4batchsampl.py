@@ -74,4 +74,4 @@ for kappa in Kappa:
 
 print(cond)
 print(res)
-print(error)
+print(errors)

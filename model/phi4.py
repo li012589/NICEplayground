@@ -65,7 +65,16 @@ class phi4:
             S_,i_ = tf.while_loop(c,fn,[S,i])
             S_ = tf.reshape(S_,[-1]) +tf.reshape(tf.cast(tf.reduce_sum(tf.square(z),1) + self.lamb*tf.reduce_sum(tf.square(tf.square(z)-1),1),tf.float32),[-1])
             return S_
-
+    def reload(self,n,l,d,kappa,lamb,name=None):
+        if name is None:
+            pass
+        else:
+            self.name = name
+        self.d = d
+        self.n = n
+        self.l = l
+        self.kappa = kappa
+        self.lamb = lamb
     def mean(self,z,s):
         return np.mean(z[:,s:],axis=1)
     def std(self,z,s):

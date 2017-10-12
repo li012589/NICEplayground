@@ -28,13 +28,15 @@ Lamb = [1.145]
 def prior(batchSize):
     return np.random.normal(0,1,[batchSize,n])
 
+saveName = "phi4_3D"+str(n)+"_"+str(1.145)+"_"+str(0.18)
+
+mod = phi4(n,l,dim,0.15,1.145,saveName)
 res = []
 errors = []
 cond = []
 for kappa in Kappa:
     for lamb in Lamb:
         '''Define the same NICE-MC sampler as in training'''
-        mod = phi4(n,l,dim,kappa,lamb,"phi4_3D"+str(n)+"_"+str(lamb)+"_"+str(kappa))
         m = 2
         b = 8
         net = NiceNetwork()
@@ -44,6 +46,7 @@ for kappa in Kappa:
         for dims, name ,active, swap in niceStructure:
             net.append(NiceLayer(dims,mlp,active,name,swap))
         dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
+        mod.reload(n,l,dim,kappa,lamb)
         sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary')
 
         '''Starting sampling'''
@@ -57,6 +60,7 @@ for kappa in Kappa:
         z_o = z[BurnIn:,:]
         m_abs = np.mean(z_o,2)
         m_abs = np.absolute(m_abs)
+
         m_abs_p = np.mean(m_abs)
         autoCorrelation,error =  autoCorrelationTimewithErr(m_abs,bins)
         acceptRate = acceptance_rate(z_o)

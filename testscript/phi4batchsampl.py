@@ -74,7 +74,7 @@ for kappa in Kappa:
         print("measure: <|m|/V>",m_abs_p,"with error:",error)
         print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
         autos.append(autoCorrelation)
-        arates.append(autoCorrelation)
+        arates.append(acceptRate)
         tf.reset_default_graph()
 
 print("Condition:")

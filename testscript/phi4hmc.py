@@ -34,12 +34,11 @@ errors = []
 cond = []
 autos=[]
 arates=[]
-energyFn = phi4(n,l,dim,0.15,1.145)
 
 for lamb in Lamb:
     for kappa in Kappa:
         '''Define sampler'''
-        energyFn.reload(n,l,dim,kappa,lamb)
+        energyFn = phi4(n,l,dim,kappa,lamb)
         hmc = HMCSampler(energyFn,prior)
         z = hmc.sample(TimeStep,BatchSize)
         z_o = z[BurnIn:,:]

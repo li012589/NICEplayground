@@ -3,7 +3,7 @@ if __name__ == "__main__":
     import os
     sys.path.append(os.getcwd())
 
-import tensirflow as tf
+import tensorflow as tf
 import numpy as np
 from hmc.hmc import HMCSampler
 from utils.autoCorrelation import autoCorrelationTimewithErr

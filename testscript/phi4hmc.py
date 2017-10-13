@@ -3,6 +3,7 @@ if __name__ == "__main__":
     import os
     sys.path.append(os.getcwd())
 
+import tensirflow as tf
 import numpy as np
 from hmc.hmc import HMCSampler
 from utils.autoCorrelation import autoCorrelationTimewithErr
@@ -30,7 +31,11 @@ bins = 2
 
 res = []
 errors = []
+cond = []
+autos=[]
+arates=[]
 energyFn = phi4(n,l,dim,0.15,1.145)
+
 for lamb in Lamb:
     for kappa in Kappa:
         '''Define sampler'''
@@ -46,12 +51,23 @@ for lamb in Lamb:
         res.append(m_abs_p)
         autoCorrelation,error =  autoCorrelationTimewithErr(m_abs,bins)
         acceptRate = acceptance_rate(z_o)
+        errors.append(error)
+        cond.append('l:'+str(lamb)+";"+"k"+str(kappa))
+        autos.append(autoCorrelation)
+        arates.append(acceptRate)
         print("kappa:",kappa)
         print("measure: <|m|/V>",m_abs_p,"with error:",error)
         errors.append(error)
         print('Acceptance Rate:',(acceptRate),'Autocorrelation Time:',(autoCorrelation))
+        tf.reset_default_graph()
 
+print("Condition:")
+print(cond)
 print("measure: <|m|/V>")
 print(res)
-print("error:")
+print("Autorrelation Time:")
+print(autos)
+print("Acceptance Rate:")
+print(arates)
+print("Errors:")
 print(errors)

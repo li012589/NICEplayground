@@ -45,7 +45,7 @@ for dims, name ,active, swap in niceStructure:
 dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
 
 '''Configure to use customized session'''
-gm = manager.GPUManger()
+gm = manager.GPUManager()
 sess = gm.sess
 
 sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary',sess=sess)

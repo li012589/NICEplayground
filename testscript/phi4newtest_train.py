@@ -3,6 +3,7 @@ if __name__ == "__main__":
     import os
     sys.path.append(os.getcwd())
 
+import manager 
 import tensorflow as tf
 import numpy as np
 from NICE.niceLayer import NiceLayer,NiceNetwork
@@ -36,16 +37,16 @@ b = 8
 ifload = False
 ifsummary = True
 net = NiceNetwork()
-niceStructure = [([[zSize,400],[400,800],[800,400],[400,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,400],[400,800],[800,400],[400,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,400],[400,800],[800,400],[400,zSize]],'generator/v2',tf.nn.relu,False)]
-discriminatorStructure = [[2*zSize,400],[400,800],[800,400],[400,1]]
+niceStructure = [([[zSize,800],[800,1000],[1000,800],[800,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,800],[800,1000],[1000,800],[800,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,800],[800,1000],[1000,800],[800,zSize]],'generator/v2',tf.nn.relu,False)]
+discriminatorStructure = [[2*zSize,400],[400,400],[400,400],[400,1]]
 
 for dims, name ,active, swap in niceStructure:
     net.append(NiceLayer(dims,mlp,active,name,swap))
 dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
 
 '''Configure to use customized session'''
-config = tf.ConfigProto(allow_soft_placement=True)
-sess = tf.Session(config=config)
+gm = manager.GPUManger()
+sess = gm.sess
 
 sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary',sess=sess)
 

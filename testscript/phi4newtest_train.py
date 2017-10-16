@@ -36,8 +36,8 @@ b = 8
 ifload = False
 ifsummary = True
 net = NiceNetwork()
-niceStructure = [([[zSize,400],[400,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,400],[400,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,400],[400,zSize]],'generator/v2',tf.nn.relu,False)]
-discriminatorStructure = [[2*zSize,400],[400,400],[400,400],[400,1]]
+niceStructure = [([[zSize,400],[400,800],[800,400],[400,zSize]],'generator/v1',tf.nn.relu,False),([[zSize,400],[400,800],[800,400],[400,zSize]],'generator/x1',tf.nn.relu,True),([[zSize,400],[400,800],[800,400],[400,zSize]],'generator/v2',tf.nn.relu,False)]
+discriminatorStructure = [[2*zSize,400],[400,800],[800,400],[400,1]]
 
 for dims, name ,active, swap in niceStructure:
     net.append(NiceLayer(dims,mlp,active,name,swap))

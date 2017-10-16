@@ -42,8 +42,8 @@ for kappa in Kappa:
     for lamb in Lamb:
         #mod.reload(n,l,dim,kappa,lamb)
         net = NiceNetwork()
-        niceStructure = [([[n,400],[400,n]],'generator/v1',tf.nn.relu,False),([[n,400],[400,n]],'generator/x1',tf.nn.relu,True),([[n,400],[400,n]],'generator/v2',tf.nn.relu,False)]
-        discriminatorStructure = [[2*n,400],[400,400],[400,400],[400,1]]
+        niceStructure = [([[n,400],[400,800],[800,400],[400,n]],'generator/v1',tf.nn.relu,False),([[n,400],[400,800],[800,400],[400,n]],'generator/x1',tf.nn.relu,True),([[n,400],[400,800],[800,400],[400,n]],'generator/v2',tf.nn.relu,False)]
+        discriminatorStructure = [[2*n,400],[400,800],[800,400],[400,1]]
 
         for dims, name ,active, swap in niceStructure:
             net.append(NiceLayer(dims,mlp,active,name,swap))

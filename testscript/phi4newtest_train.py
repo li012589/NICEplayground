@@ -3,7 +3,7 @@ if __name__ == "__main__":
     import os
     sys.path.append(os.getcwd())
 
-import manager 
+import manager
 import tensorflow as tf
 import numpy as np
 from NICE.niceLayer import NiceLayer,NiceNetwork
@@ -48,8 +48,10 @@ dnet = mlp(discriminatorStructure,leaky_relu,"discriminator")
 gm = manager.GPUManager()
 sess = gm.sess
 
-sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary',sess=sess)
+with gm.auto_choice():
 
-'''Start training'''
-print("Training NICE for "+sampler.energyFn.name)
-sampler.train(500,100000,5000,32,1000,100,32,5000,1000,5,32,1000,ifsummary,ifload)
+    sampler = NICEMCSampler(mod,prior,net,dnet,b,m,'./savedNetwork','./tfSummary',sess=sess)
+
+    '''Start training'''
+    print("Training NICE for "+sampler.energyFn.name)
+    sampler.train(500,100000,5000,32,1000,100,32,5000,1000,5,32,1000,ifsummary,ifload)
